@@ -1,0 +1,24 @@
+{
+  "name": "contao_rhyme_mailchimp",
+  "type": "project",
+  "description": "A Mailchimp extension for Contao CMS",
+  "license": "LGPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Rhyme Digital, LLC.",
+      "homepage": "https://github.com/RhymeDigital"
+    }
+  ],
+  "require": {
+    "php": ">=5.4 || ^7.0",
+    "contao/core-bundle":"~3.2 || ~4.1",
+    "composer require jhut89/mailchimp3php": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Rhyme\\": [
+        "src/Rhyme"
+      ]
+    }
+  }
+}
