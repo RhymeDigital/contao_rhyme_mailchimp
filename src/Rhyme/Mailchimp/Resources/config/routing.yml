@@ -1,0 +1,3 @@
+rhyme.mailchimp.frontend:
+  resource: "@RhymeMailchimpBundle/Controller"
+  type:     annotation

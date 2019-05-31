@@ -13,6 +13,8 @@ use Contao\Input;
 use Contao\System;
 use Contao\Backend;
 use Contao\Database;
+use Contao\FormModel;
+use Rhyme\Mailchimp\Model\ApiKey as MC_ApiKeyModel;
 use MailchimpAPI\Mailchimp;
 use MailchimpAPI\Responses\MailchimpResponse;
 use MailchimpAPI\MailchimpException;
@@ -23,28 +25,6 @@ use MailchimpAPI\MailchimpException;
  */
 class Callbacks extends Backend
 {
-
-    /**
-     * Get MC API Keys
-     * @return array
-     */
-    public function getMailChimpAPIKeys()
-    {
-        $arrKeys = array('-- Please select --');
-
-        $objResult = Database::getInstance()->prepare("SELECT * FROM tl_mailchimp_apikeys")->execute();
-
-        if ($objResult->numRows)
-        {
-            while ($objResult->next())
-            {
-                $arrKeys[$objResult->id] = $objResult->name;
-            }
-        }
-
-        return $arrKeys;
-    }
-
 
     /**
      * Get MC lists
@@ -58,20 +38,19 @@ class Callbacks extends Backend
             return $arrLists;
         }
 
-        $objForm = Database::getInstance()->prepare("SELECT * FROM tl_form WHERE id=?")->execute(Input::get('id'));
-
-        if ($objForm->numRows)
+        $objForm = FormModel::findByPk(Input::get('id'));
+        if ($objForm !== null)
         {
             // Get API Key data
-            $objResult = Database::getInstance()->prepare("SELECT * FROM tl_mailchimp_apikeys WHERE id=?")->execute($objForm->mailChimpAPIKey);
-            if ($objResult->numRows == 0)
+            $objApiKey = MC_ApiKeyModel::findByPk($objForm->mailChimpAPIKey);
+            if ($objApiKey === null)
             {
                 return array();
             }
 
             try
             {
-                $objMailchimp = new Mailchimp($objResult->api_key);
+                $objMailchimp = new Mailchimp($objApiKey->api_key);
                 $objResponse = $objMailchimp->lists()->get();
 
                 if (!$objResponse->wasSuccess())
