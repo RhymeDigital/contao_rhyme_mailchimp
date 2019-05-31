@@ -14,7 +14,6 @@ use Contao\Controller;
  */
 Controller::loadLanguageFile('tl_content');
 
-
 /**
  * Table tl_mailchimp_apikeys
  */

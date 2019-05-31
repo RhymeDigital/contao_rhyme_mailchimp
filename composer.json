@@ -1,5 +1,5 @@
 {
-  "name": "contao_rhyme_mailchimp",
+  "name": "rhymedigital/contao_rhyme_mailchimp",
   "type": "project",
   "description": "A Mailchimp extension for Contao CMS",
   "license": "LGPL-3.0-or-later",
@@ -10,15 +10,24 @@
     }
   ],
   "require": {
-    "php": ">=5.4 || ^7.0",
+    "php": ">=5.6 || ^7.0",
     "contao/core-bundle":"~3.2 || ~4.1",
-    "jhut89/mailchimp3php": "^3.0"
+    "jhut89/mailchimp3php": "^3.0",
+    "contao/manager-plugin": "^2.0"
+  },
+  "require-dev": {
+    "contao/manager-plugin": "^2.0"
   },
   "autoload": {
     "psr-4": {
-      "Rhyme\\": [
-        "src/Rhyme"
-      ]
+      "Rhyme\\": "src/Rhyme"
     }
+  },
+  "extra":{
+    "branch-alias": {
+      "dev-master": "2.0.x-dev",
+      "dev-develop": "2.0.x-dev"
+    },
+    "contao-manager-plugin": "Rhyme\\Mailchimp\\ContaoManager\\Plugin"
   }
 }
