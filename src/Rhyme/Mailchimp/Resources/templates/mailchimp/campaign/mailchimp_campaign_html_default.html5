@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="<?php echo $this->language; ?>">
+<head>
+    <?php
+    use Contao\StringUtil;
+    use Contao\Environment;
+    ?>
+    <meta charset="<?php echo $this->charset; ?>">
+    <title><?= $this->title ?></title>
+    <base href="<?php echo $this->base; ?>">
+    <?= $this->styles ?>
+</head>
+<body id="top" style="margin: 0;">
+
+<div id="wrapper">
+    <center>
+        <table cellpadding="0" cellspacing="0" style="width: 100%; max-width: 100%; text-align: center;">
+            <tr>
+                <td align="center">
+
+                    <table cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; margin: 0 auto;">
+
+                        <tr class="header row">
+
+                            <td style="width: 100%; max-width: 600px;" valign="top" align="center">
+                                <a href="<?= Environment::get('base') ?>" title="Northampton.Live, Northampton MA Website" style="display: block; padding: 0; margin: 0; line-height: 0;">
+                                    <img src="<?= Environment::get('base') ?>/files/noho/assets/img/email/emailheader.jpg" width="650" alt="" itemprop="image">
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td>
+
+                                <table cellspacing="0" cellpadding="20" style="background-color: #f9f9f9; color: #666; font-size: 16px; line-height: 150%; font-family: Arial, sans-serif; -webkit-text-size-adjust:none;">
+
+                                    <?php foreach ($this->elements as $intId=>$arrElement): ?>
+
+                                    <tr class="element row ce-type-<?= StringUtil::standardize($arrElement['model']->type) ?>">
+                                        <td style="border-top: 1px solid #000; border-left: 1px solid #000; border-right: 1px solid #000;">
+
+                                            <?= $arrElement['html'] ?>
+
+                                        </td>
+                                    </tr>
+
+                                    <?php endforeach; ?>
+
+                                    <tr class="unsubscribe row">
+                                        <td style="border-bottom: 1px solid #000; border-left: 1px solid #000; border-right: 1px solid #000; color: #666; font-size: 12px; line-height: 120%; text-align: center;">
+                                            You are receiving this email because you have subscribed to newsletters from northampton.live.
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+                        </tr>
+
+                        <tr class="spacer row">
+                            <td align="center">
+                                &nbsp;
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    <table cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; margin: 0 auto;">
+
+                        <tr class="footerTop row">
+                            <td align="center" style="width: 100%; max-width: 600px; padding: 10px 0 0;">
+                                <a href="<?= Environment::get('base') ?>" title="Northampton.Live, Northampton MA Website" style="display: block; padding: 0; margin: 0; line-height: 0;">
+                                    <img src="<?= Environment::get('base') ?>/files/noho/assets/img/email/emailfooter.jpg" height="auto" alt="" itemprop="image">
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr class="spacer row">
+                            <td align="center">
+                                &nbsp;
+                            </td>
+                        </tr>
+
+                        <tr class="footerBottom row">
+                            <td align="center" style="padding: 0 0 30px;">
+                                <p style="font-size: 11px; text-align: center; display: block; color: #fff; font-family: Arial, sans-serif;">&copy;<?= date('Y', time()) ?> Northampton, MA. </p>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+    </center>
+    </div>
+
+</body>
+</html>

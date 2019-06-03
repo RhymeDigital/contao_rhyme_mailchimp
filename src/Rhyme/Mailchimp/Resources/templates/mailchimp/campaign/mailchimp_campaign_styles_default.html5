@@ -1,0 +1,13 @@
+<style>
+    .sf-toolbar {
+        display: none !important;
+    }
+    body {
+        background-color: #000;
+    }
+    img {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+    }
+</style>

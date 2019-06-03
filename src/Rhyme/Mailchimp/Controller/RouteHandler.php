@@ -9,13 +9,12 @@
 
 namespace Rhyme\Mailchimp\Controller;
 
-use Rhyme\Noho\Frontend\Controller\NewsletterHandler;
-
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Response;
+use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
 
 /**
  * Handles custom scripts
@@ -39,7 +38,7 @@ class RouteHandler extends Controller
             $this->container->get('contao.framework')->initialize();
         }
 
-        return NewsletterHandler::generateHTML($campaign);
+        return CampaignHandler::generateHTML($campaign);
     }
 
 

@@ -237,6 +237,69 @@ class Callbacks extends Backend
 
 
     /**
+     * Delete a campaign
+     * @param null $dc
+     */
+    public function campaignDelete($dc=null)
+    {
+        if (!\class_exists('\MailchimpAPI\Mailchimp'))
+        {
+            return;
+        }
+
+        // Get the current campaign model
+        $objCampaign = MC_CampaignModel::findByPk(Input::get('id'));
+        if ($objCampaign === null)
+        {
+            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
+            return;
+        }
+
+        if (!$objCampaign->campaign_id)
+        {
+            return;
+        }
+
+        // Get API key model
+        $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
+        if ($objApiKey === null)
+        {
+            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
+            return;
+        }
+
+        try
+        {
+            $objMailchimp = new Mailchimp($objApiKey->api_key);
+
+            // Try unscheduling first - todo: check status?
+            $objResponse = $objMailchimp
+                ->campaigns($objCampaign->campaign_id)
+                ->unschedule();
+
+            if (!$objResponse->wasSuccess())
+            {
+                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+            }
+
+            // Now try cancelling (only works in "Pro" accounts)
+            $objResponse = $objMailchimp
+                ->campaigns($objCampaign->campaign_id)
+                ->cancel();
+
+            if (!$objResponse->wasSuccess())
+            {
+                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+            }
+        }
+        catch (MailchimpException $e)
+        {
+            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+        }
+    }
+
+
+    /**
      * Add/update a campaign in Mailchimp
      * @param null $dc
      */
@@ -247,85 +310,169 @@ class Callbacks extends Backend
             return;
         }
 
+        // Get the current campaign model
         $objCampaign = MC_CampaignModel::findByPk(Input::get('id'));
-        if ($objCampaign !== null)
+        if ($objCampaign === null)
         {
-            // Get API Key data
-            $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
-            if ($objApiKey === null)
+            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
+            return;
+        }
+
+        if (!$objCampaign->mc_list)
+        {
+            return;
+        }
+
+        // Get API key model
+        $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
+        if ($objApiKey === null)
+        {
+            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
+            return;
+        }
+
+        try
+        {
+            $objMailchimp = new Mailchimp($objApiKey->api_key);
+
+            // Create
+            if (!$objCampaign->campaign_id)
             {
-                return;
+                static::createNewMailchimpCampaign($objMailchimp, $objCampaign);
             }
-
-            try
+            // Update
+            else
             {
-                $objResponse = null;
-                $objMailchimp = new Mailchimp($objApiKey->api_key);
+                static::updateMailchimpCampaign($objMailchimp, $objCampaign);
+            }
+        }
+        catch (MailchimpException $e)
+        {
+            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+        }
+    }
 
-                // Create
-                if (!$objCampaign->campaign_id)
+
+    /**
+     * Create a new campaign in Mailchimp
+     * @param Mailchimp $objMailchimp
+     * @param MC_CampaignModel $objCampaign
+     */
+    protected static function createNewMailchimpCampaign(Mailchimp $objMailchimp, MC_CampaignModel $objCampaign)
+    {
+        try
+        {
+            $objResponse = $objMailchimp
+                ->campaigns()
+                ->post(array(
+                    'type' => 'regular',
+                    'recipients' => array(
+                        'list_id' => $objCampaign->mc_list
+                    ),
+                    'settings' => array(
+                        'subject_line' => $objCampaign->mc_subject,
+                        'preview_text' => $objCampaign->mc_preview_text,
+                        'title' => $objCampaign->name,
+                        'from_name' => $objCampaign->mc_from_name,
+                        'reply_to' => $objCampaign->mc_replyto_email,
+                        'use_conversation' => false,
+                        'to_name' => '',
+                        'auto_footer' => true
+                    ),
+                    'tracking' => array(
+                        'opens' => true,
+                        'html_clicks' => true,
+                        'text_clicks' => true,
+                        'goal_tracking' => true,
+                        'ecomm360' => false
+                    )
+                ));
+
+            if (!$objResponse->wasSuccess())
+            {
+                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+            }
+            else
+            {
+
+                if (!$objResponse->wasSuccess())
                 {
+                    System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                }
+                else
+                {
+                    $arrResponseData = json_decode($objResponse->getBody(), true);
+
+                    // Save the campaign ID
+                    $objCampaign->campaign_id = $arrResponseData['id'];
+                    $objCampaign->web_id = $arrResponseData['web_id'];
+                    $objCampaign->save();
+
+                    // Todo: remove this after testing!
+                    $strHost = stripos(Environment::get('url'), 'dev.') !== false ? 'https://northampton.live' : Environment::get('url');
+
+                    // Set the content to the local URL - Todo: add other options
                     $objResponse = $objMailchimp
-                        ->campaigns()
-                        ->post(array(
-                            'type' => 'regular',
-                            'recipients' => array(
-                                'list_id' => $objCampaign->mc_list
-                            ),
-                            'settings' => array(
-                                'subject_line' => $objCampaign->mc_subject,
-                                'preview_text' => $objCampaign->mc_preview_text,
-                                'title' => $objCampaign->mc_title,
-                                'from_name' => $objCampaign->mc_from_name,
-                                'reply_to' => $objCampaign->mc_replyto_email,
-                                'use_conversation' => false,
-                                'to_name' => '',
-                                'auto_footer' => true
-                            ),
-                            'tracking' => array(
-                                'opens' => true,
-                                'html_clicks' => true,
-                                'text_clicks' => true,
-                                'goal_tracking' => true,
-                                'ecomm360' => false
-                            )
+                        ->campaigns($objCampaign->campaign_id)
+                        ->content()
+                        ->put(array(
+                            'url' => $strHost.'/mailchimp/campaign/'.$objCampaign->id
                         ));
 
                     if (!$objResponse->wasSuccess())
                     {
-                        System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                        System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
                     }
                     else
                     {
-                        $arrResponseData = json_decode($objResponse->getBody(), true);
-
-                        // Save the campaign ID
-                        $objCampaign->campaign_id = $arrResponseData['id'];
-                        $objCampaign->web_id = $arrResponseData['web_id'];
-                        $objCampaign->save();
-
-                        $objResponse = $objMailchimp
-                            ->campaigns($objCampaign->web_id)
-                            ->content()
-                            ->put(array(
-                                'url' => Environment::get('url').'/mailchimp/campaign/'.$objCampaign->id
-                            ));
-
-                        if (!$objResponse->wasSuccess())
-                        {
-                            System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-                        }
-                        else
-                        {
-                            System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
-                        }
+                        System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
                     }
                 }
             }
-            catch (MailchimpException $e)
+        }
+        catch (MailchimpException $e)
+        {
+            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+        }
+    }
+
+
+    /**
+     * Update an existing campaign in Mailchimp
+     * @param Mailchimp $objMailchimp
+     * @param MC_CampaignModel $objCampaign
+     */
+    protected static function updateMailchimpCampaign(Mailchimp $objMailchimp, MC_CampaignModel $objCampaign)
+    {
+        try
+        {
+            $objResponse = $objMailchimp
+                ->campaigns($objCampaign->campaign_id)
+                ->patch(array(
+                    'recipients' => array(
+                        'list_id' => $objCampaign->mc_list
+                    ),
+                    'settings' => array(
+                        'subject_line' => $objCampaign->mc_subject,
+                        'preview_text' => $objCampaign->mc_preview_text,
+                        'title' => $objCampaign->name,
+                        'from_name' => $objCampaign->mc_from_name,
+                        'reply_to' => $objCampaign->mc_replyto_email,
+                    )
+                ));
+
+            if (!$objResponse->wasSuccess())
             {
-                System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
             }
+            else
+            {
+                System::log('Mailchimp campaign updated successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+            }
+        }
+        catch (MailchimpException $e)
+        {
+            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
         }
     }
 
