@@ -1,0 +1,1 @@
+<?= strip_tags(implode("\n\r\n\r", str_replace(array('<br>', '</p>'), array("\n", "</p>\n"), $this->elements))); ?>

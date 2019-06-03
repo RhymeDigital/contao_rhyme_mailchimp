@@ -22,11 +22,15 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
     (
         'dataContainer'               => 'Table',
         'switchToEdit'                => true,
-        'enableVersioning'            => true,
+        'enableVersioning'            => false,
         'ctable'                      => array('tl_content'),
         'onsubmit_callback'           => array
         (
             array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'campaignSave'),
+        ),
+        'ondelete_callback'           => array
+        (
+            array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'campaignDelete'),
         ),
         'sql' => array
         (
@@ -79,9 +83,9 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'preview' => array
             (
                 'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['preview'],
-                'href'                => Environment::get('base').'script/newsletter/%s',
+                'href'                => Environment::get('base').'mailchimp/campaign/%s',
                 'icon'                => 'layout.svg',
-                'attributes'          => 'onclick="window.open(\''.Environment::get('base').'script/newsletter/%s\'); return false;"',
+                'attributes'          => 'onclick="window.open(\''.Environment::get('base').'mailchimp/campaign/%s\'); return false;"',
             ),
             'copy' => array
             (
@@ -116,7 +120,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
     'palettes' => array
     (
         '__selector__'                => array(),
-        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text,mc_title;{template_legend},html_tpl,styles_tpl;{publishing_legend},published,start,stop;'
+        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text;{template_legend},html_tpl,styles_tpl;{publishing_legend},published,start,stop;'
     ),
 
     // Subpalettes
@@ -141,7 +145,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50'),
+            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50', 'doNotCopy'=>true, 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
         ),
         'mc_api_key' => array
@@ -150,34 +154,33 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'exclude'                 => true,
             'inputType'               => 'select',
             'foreignKey'              => 'tl_mailchimp_apikeys.name',
-            'eval'                    => array('tl_class'=>'w50 clr', 'mandatory'=>true, 'includeBlankOption'=>true, 'submitOnChange'=>true, 'chosen'=>true),
+            'eval'                    => array('tl_class'=>'w50 clr', 'mandatory'=>true, 'includeBlankOption'=>true, 'submitOnChange'=>true, 'chosen'=>true, 'doNotSaveEmpty'=>true),
             'sql'                     => "int(10) NOT NULL default '0'"
         ),
         'mc_list' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_list'],
             'exclude'                 => true,
+            'filter'                  => true,
             'inputType'               => 'select',
             'options_callback'        => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'getMailchimpLists'),
-            'eval'                    => array('tl_class'=>'w50', 'mandatory'=>true, 'includeBlankOption'=>true, 'chosen'=>true),
+            'eval'                    => array('tl_class'=>'w50', 'mandatory'=>true, 'includeBlankOption'=>true, 'submitOnChange'=>true, 'chosen'=>true, 'doNotSaveEmpty'=>true),
             'sql'                     => "varchar(16) NOT NULL default ''"
         ),
         'mc_from_name' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_from_name'],
             'exclude'                 => true,
-            'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50 clr'),
+            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50 clr', 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
         ),
         'mc_replyto_email' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_replyto_email'],
             'exclude'                 => true,
-            'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50', 'rgxp'=>'email'),
+            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50', 'rgxp'=>'email', 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
         ),
         'mc_subject' => array
@@ -186,7 +189,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long'),
+            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long', 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
         ),
         'mc_preview_text' => array
@@ -195,26 +198,17 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long'),
-            'sql'                     => "varchar(255) NOT NULL default ''"
-        ),
-        'mc_title' => array
-        (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_title'],
-            'exclude'                 => true,
-            'search'                  => true,
-            'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long'),
+            'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long', 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
         ),
         'html_tpl' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['html_tpl'],
-            'default'                 => 'noho_newsletter_html_default',
+            'default'                 => 'mailchimp_campaign_html_default',
             'exclude'                 => true,
             'inputType'               => 'select',
             'options_callback'        => function (DataContainer $dc){
-                return Controller::getTemplateGroup('noho_newsletter_html_');
+                return Controller::getTemplateGroup('mailchimp_campaign_html_');
             },
             'eval'                    => array('tl_class'=>'w50 clr', 'mandatory'=>true, 'chosen'=>true),
             'sql'                     => "varchar(128) NOT NULL default ''"
@@ -222,11 +216,11 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         'styles_tpl' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl'],
-            'default'                 => 'noho_newsletter_styles_default',
+            'default'                 => 'mailchimp_campaign_styles_default',
             'exclude'                 => true,
             'inputType'               => 'select',
             'options_callback'        => function (DataContainer $dc){
-                return Controller::getTemplateGroup('noho_newsletter_styles_');
+                return Controller::getTemplateGroup('mailchimp_campaign_styles_');
             },
             'eval'                    => array('tl_class'=>'w50', 'mandatory'=>true, 'chosen'=>true),
             'sql'                     => "varchar(128) NOT NULL default ''"
@@ -241,16 +235,15 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'campaign_id' => array
         (
-            'sql'                     => "varchar(16) NOT NULL default ''"
-        ),
-        'web_id' => array
-        (
+            'eval'                    => array('doNotCopy'=>true),
             'sql'                     => "varchar(16) NOT NULL default ''"
         ),
         'status' => array
         (
             'inputType'               => 'select',
+            'default'                 => 'draft',
             'options'                 => array('draft', 'scheduled', 'paused', 'sent'), // More options?
+            'eval'                    => array('doNotCopy'=>true),
             'sql'                     => "varchar(32) NOT NULL default 'draft'"
         ),
     )
