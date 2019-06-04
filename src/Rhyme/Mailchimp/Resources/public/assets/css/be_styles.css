@@ -1,0 +1,51 @@
+/**
+ * BE_MOD navigation
+ */
+#tl_navigation .group-mailchimp {
+    background: url(../img/mc-freddie-dark.svg) 3px 2px no-repeat;
+    background-size: 14px 14px;
+}
+
+/**
+ * Campaigns - List
+ */
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status {
+    margin-left: 5px;
+    display: inline-block;
+    font-style: normal;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 200px;
+    padding: 3px 9px;
+    color: #444;
+}
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.new,
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.draft {
+    border: 1px solid #efeeea;
+    background-color: #efeeea;
+}
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.scheduled,
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.paused {
+    border: 1px solid #fbeeca;
+    background-color: #fbeeca;
+}
+
+
+/**
+ * Campaigns - Custom mods
+ */
+.mc_white_block {
+    padding: 10px 30px 30px;
+}
+.mc_white_block p.tl_error {
+    margin: 20px 0;
+}
+.mc_white_block h2 {
+    font-size: 22px;
+}
+#mc_messages {
+    margin: 15px 0;
+}
+.mc_white_block .submit_container {
+    padding: 30px 0;
+}
