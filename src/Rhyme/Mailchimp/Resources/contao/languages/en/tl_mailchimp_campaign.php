@@ -22,6 +22,7 @@ $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_title']			    = array('Title', 
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['html_tpl']			    = array('HTML template', 'Please select the HTML template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl']			    = array('CSS styles template', 'Please select the CSS styles template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['published']			    = array('Published', 'Check this box if the campaign should be published.');
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['status']			        = array('Status', 'The current status of the campaign.');
 
 
 /**
@@ -40,3 +41,13 @@ $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['new']         = array('New campaig
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['edit']        = array('Edit campaign', 'Edit campaign ID %s');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['copy']        = array('Duplicate campaign', 'Duplicate campaign ID %s');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['delete']      = array('Delete campaign', 'Delete campaign ID %s');
+
+
+/**
+ * Reference
+ */
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']['new']             = 'New';
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']['draft']           = 'New';
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']['sent']            = 'Sent';
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']['scheduled']       = 'Scheduled';
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']['paused']          = 'Paused';

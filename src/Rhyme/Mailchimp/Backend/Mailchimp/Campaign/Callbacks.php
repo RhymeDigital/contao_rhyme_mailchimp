@@ -19,11 +19,14 @@ use Contao\StringUtil;
 use Contao\Environment;
 use Contao\DataContainer;
 use Contao\CoreBundle\Exception\AccessDeniedException;
-use Rhyme\Mailchimp\Model\ApiKey as MC_ApiKeyModel;
-use Rhyme\Mailchimp\Model\Campaign as MC_CampaignModel;
+
 use MailchimpAPI\Mailchimp;
 use MailchimpAPI\Responses\MailchimpResponse;
 use MailchimpAPI\MailchimpException;
+
+use Rhyme\Mailchimp\Model\ApiKey as MC_ApiKeyModel;
+use Rhyme\Mailchimp\Model\Campaign as MC_CampaignModel;
+use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler as MC_CampaignHandler;
 
 /**
  * Handles backend DCA callbacks
@@ -38,6 +41,106 @@ class Callbacks extends Backend
     {
         parent::__construct();
         $this->import('BackendUser', 'User');
+    }
+
+    /**
+     * Return the "preview" button
+     *
+     * @param array  $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function previewIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        // Check permissions AFTER checking the cid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $href .= $row['campaign_id'];
+
+        return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
+    }
+
+    /**
+     * Return the "test" button
+     *
+     * @param array  $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function testIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        // Check permissions AFTER checking the cid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $href .= $row['id'];
+
+        return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
+    }
+
+    /**
+     * Return the "schedule" button
+     *
+     * @param array  $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function scheduleIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        // Check permissions AFTER checking the cid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $href .= $row['id'];
+
+        return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
+    }
+
+    /**
+     * Return the "unschedule" button
+     *
+     * @param array  $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function unscheduleIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        // Check permissions AFTER checking the cid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $href .= $row['id'];
+
+        return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
     }
 
     /**
@@ -237,89 +340,60 @@ class Callbacks extends Backend
 
 
     /**
-     * Delete a campaign
-     * @param null $dc
+     * Custom actions on DCA
+     * @param DataContainer|null $dc
      */
-    public function campaignDelete($dc=null)
+    public function loadDca(DataContainer $dc=null)
     {
-        if (!\class_exists('\MailchimpAPI\Mailchimp'))
+        if ($dc && $dc->id)
         {
-            return;
-        }
-
-        // Get the current campaign model
-        $objCampaign = MC_CampaignModel::findByPk(Input::get('id'));
-        if ($objCampaign === null)
-        {
-            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
-            return;
-        }
-
-        if (!$objCampaign->campaign_id)
-        {
-            return;
-        }
-
-        // Get API key model
-        $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
-        if ($objApiKey === null)
-        {
-            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
-            return;
-        }
-
-        try
-        {
-            $objMailchimp = new Mailchimp($objApiKey->api_key);
-
-            // Try unscheduling first - todo: check status?
-            $objResponse = $objMailchimp
-                ->campaigns($objCampaign->campaign_id)
-                ->unschedule();
-
-            if (!$objResponse->wasSuccess())
+            $objResult = Database::getInstance()->prepare("SELECT * FROM tl_mailchimp_campaign WHERE id=?")->execute($dc->id);
+            if ($objResult->numRows && $objResult->campaign_id)
             {
-                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-            }
-
-            // Now try cancelling (only works in "Pro" accounts)
-            $objResponse = $objMailchimp
-                ->campaigns($objCampaign->campaign_id)
-                ->cancel();
-
-            if (!$objResponse->wasSuccess())
-            {
-                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                // Don't allow the user to change the API key if the campaign has already been created in Mailchimp
+                $GLOBALS['TL_DCA']['tl_mailchimp_campaign']['fields']['mc_api_key']['eval']['disabled'] = true;
+                $GLOBALS['TL_DCA']['tl_mailchimp_campaign']['fields']['mc_api_key']['eval']['chosen'] = false;
+                $GLOBALS['TL_DCA']['tl_mailchimp_campaign']['fields']['mc_api_key']['eval']['mandatory'] = false;
             }
         }
-        catch (MailchimpException $e)
-        {
-            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
-        }
+    }
+
+
+    /**
+     * @param array $row
+     * @param string $label
+     * @param DataContainer|null $dc
+     * @param null $folderAttribute
+     * @param bool $blnStd
+     * @param bool $blnProtected
+     * @return string
+     */
+    public function generateLabel(array $row, $label='', DataContainer $dc=null, $folderAttribute=null, $blnStd=false, $blnProtected=false)
+    {
+        return str_replace('<span class="mc_status">', '<span class="mc_status '.StringUtil::standardize($row['status']).'">', $label);
     }
 
 
     /**
      * Add/update a campaign in Mailchimp
-     * @param null $dc
+     * @param DataContainer|null $dc
      */
-    public function campaignSave($dc=null)
+    public function campaignSave(DataContainer $dc=null)
     {
-        if (!\class_exists('\MailchimpAPI\Mailchimp'))
+        if (!$dc ||
+            !$dc->activeRecord ||
+            !$dc->activeRecord->mc_api_key ||
+            !$dc->activeRecord->mc_list ||
+            !\class_exists('\MailchimpAPI\Mailchimp'))
         {
             return;
         }
 
         // Get the current campaign model
-        $objCampaign = MC_CampaignModel::findByPk(Input::get('id'));
+        $objCampaign = MC_CampaignModel::findByPk($dc->activeRecord->id);
         if ($objCampaign === null)
         {
             System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
-            return;
-        }
-
-        if (!$objCampaign->mc_list)
-        {
             return;
         }
 
@@ -335,145 +409,66 @@ class Callbacks extends Backend
         {
             $objMailchimp = new Mailchimp($objApiKey->api_key);
 
+            // Pass the submitted data via the campaign model
+            $arrRow = $dc->activeRecord->row();
+            foreach ($arrRow as $field=>$data)
+            {
+                $objCampaign->{$field} = $data;
+            }
+
             // Create
             if (!$objCampaign->campaign_id)
             {
-                static::createNewMailchimpCampaign($objMailchimp, $objCampaign);
+                MC_CampaignHandler::createNewMailchimpCampaign($objMailchimp, $objCampaign);
             }
             // Update
             else
             {
-                static::updateMailchimpCampaign($objMailchimp, $objCampaign);
+                MC_CampaignHandler::updateMailchimpCampaign($objMailchimp, $objCampaign);
             }
         }
-        catch (MailchimpException $e)
-        {
-            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
-        }
+        catch (\Exception $e){}
     }
 
 
     /**
-     * Create a new campaign in Mailchimp
-     * @param Mailchimp $objMailchimp
-     * @param MC_CampaignModel $objCampaign
+     * Delete a campaign
+     * @param DataContainer|null $dc
      */
-    protected static function createNewMailchimpCampaign(Mailchimp $objMailchimp, MC_CampaignModel $objCampaign)
+    public function campaignDelete(DataContainer $dc=null)
     {
+        if (!$dc ||
+            !$dc->activeRecord ||
+            !$dc->activeRecord->mc_api_key ||
+            !$dc->activeRecord->campaign_id ||
+            !\class_exists('\MailchimpAPI\Mailchimp'))
+        {
+            return;
+        }
+
+        // Get the current campaign model
+        $objCampaign = MC_CampaignModel::findByPk($dc->activeRecord->id);
+        if ($objCampaign === null)
+        {
+            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
+            return;
+        }
+
+        // Get API key model
+        $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
+        if ($objApiKey === null)
+        {
+            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
+            return;
+        }
+
         try
         {
-            $objResponse = $objMailchimp
-                ->campaigns()
-                ->post(array(
-                    'type' => 'regular',
-                    'recipients' => array(
-                        'list_id' => $objCampaign->mc_list
-                    ),
-                    'settings' => array(
-                        'subject_line' => $objCampaign->mc_subject,
-                        'preview_text' => $objCampaign->mc_preview_text,
-                        'title' => $objCampaign->name,
-                        'from_name' => $objCampaign->mc_from_name,
-                        'reply_to' => $objCampaign->mc_replyto_email,
-                        'use_conversation' => false,
-                        'to_name' => '',
-                        'auto_footer' => true
-                    ),
-                    'tracking' => array(
-                        'opens' => true,
-                        'html_clicks' => true,
-                        'text_clicks' => true,
-                        'goal_tracking' => true,
-                        'ecomm360' => false
-                    )
-                ));
+            $objMailchimp = new Mailchimp($objApiKey->api_key);
 
-            if (!$objResponse->wasSuccess())
-            {
-                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-            }
-            else
-            {
-
-                if (!$objResponse->wasSuccess())
-                {
-                    System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-                }
-                else
-                {
-                    $arrResponseData = json_decode($objResponse->getBody(), true);
-
-                    // Save the campaign ID
-                    $objCampaign->campaign_id = $arrResponseData['id'];
-                    $objCampaign->web_id = $arrResponseData['web_id'];
-                    $objCampaign->save();
-
-                    // Todo: remove this after testing!
-                    $strHost = stripos(Environment::get('url'), 'dev.') !== false ? 'https://northampton.live' : Environment::get('url');
-
-                    // Set the content to the local URL - Todo: add other options
-                    $objResponse = $objMailchimp
-                        ->campaigns($objCampaign->campaign_id)
-                        ->content()
-                        ->put(array(
-                            'url' => $strHost.'/mailchimp/campaign/'.$objCampaign->id
-                        ));
-
-                    if (!$objResponse->wasSuccess())
-                    {
-                        System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-                    }
-                    else
-                    {
-                        System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
-                    }
-                }
-            }
+            MC_CampaignHandler::unscheduleMailchimpCampaign($objMailchimp, $objCampaign);
         }
-        catch (MailchimpException $e)
-        {
-            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
-        }
-    }
-
-
-    /**
-     * Update an existing campaign in Mailchimp
-     * @param Mailchimp $objMailchimp
-     * @param MC_CampaignModel $objCampaign
-     */
-    protected static function updateMailchimpCampaign(Mailchimp $objMailchimp, MC_CampaignModel $objCampaign)
-    {
-        try
-        {
-            $objResponse = $objMailchimp
-                ->campaigns($objCampaign->campaign_id)
-                ->patch(array(
-                    'recipients' => array(
-                        'list_id' => $objCampaign->mc_list
-                    ),
-                    'settings' => array(
-                        'subject_line' => $objCampaign->mc_subject,
-                        'preview_text' => $objCampaign->mc_preview_text,
-                        'title' => $objCampaign->name,
-                        'from_name' => $objCampaign->mc_from_name,
-                        'reply_to' => $objCampaign->mc_replyto_email,
-                    )
-                ));
-
-            if (!$objResponse->wasSuccess())
-            {
-                System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-            }
-            else
-            {
-                System::log('Mailchimp campaign updated successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
-            }
-        }
-        catch (MailchimpException $e)
-        {
-            System::log('Mailchimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
-        }
+        catch (\Exception $e){}
     }
 
 }

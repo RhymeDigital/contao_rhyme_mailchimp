@@ -49,23 +49,51 @@ class Campaign extends Model
     /**
      * Find a published campaign by its ID or alias
      *
-     * @param mixed $varId      The numeric ID or alias name
+     * @param mixed $intId      The numeric ID
      * @param array $arrOptions An optional options array
      *
-     * @return static|null The model or null if there is no newsletter
+     * @return static|null The model or null if there is no campaign
      */
-    public static function findPublishedById($varId, array $arrOptions=array())
+    public static function findPublishedById($intId, array $arrOptions=array())
     {
         $t = static::$strTable;
         $arrColumns = array("$t.id=?");
 
         if (!static::isPreviewMode($arrOptions))
         {
-            $time = Date::floorToMinute();
             $arrColumns[] = "$t.published='1'";
         }
 
-        return static::findOneBy($arrColumns, $varId, $arrOptions);
+        return static::findOneBy($arrColumns, $intId, $arrOptions);
+    }
+
+
+    /**
+     * Find a published campaign by its Mailchimp campaign ID
+     *
+     * @param string $strCampaignId The Mailchimp campaign ID
+     * @param array $arrOptions An optional options array
+     *
+     * @return static|null The model or null if there is no campaign
+     */
+    public static function findPublishedByCampaignId($strCampaignId, array $arrOptions=array())
+    {
+        $strCampaignId = trim($strCampaignId);
+
+        if (trim($strCampaignId) == '')
+        {
+            return null;
+        }
+
+        $t = static::$strTable;
+        $arrColumns = array("$t.campaign_id=?");
+
+        if (!static::isPreviewMode($arrOptions))
+        {
+            $arrColumns[] = "$t.published='1'";
+        }
+
+        return static::findOneBy($arrColumns, $strCampaignId, $arrOptions);
     }
 
 

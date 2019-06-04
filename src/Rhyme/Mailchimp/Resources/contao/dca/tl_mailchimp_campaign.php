@@ -13,6 +13,7 @@ use Contao\Environment;
 use Contao\DataContainer;
 
 System::loadLanguageFile('tl_content');
+System::loadLanguageFile('tl_mailchimp_campaign');
 
 $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
 (
@@ -24,6 +25,10 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         'switchToEdit'                => true,
         'enableVersioning'            => false,
         'ctable'                      => array('tl_content'),
+        'onload_callback'           => array
+        (
+            array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'loadDca'),
+        ),
         'onsubmit_callback'           => array
         (
             array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'campaignSave'),
@@ -53,8 +58,9 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'label' => array
         (
-            'fields'                  => array('name'),
-            'format'                  => '%s'
+            'fields'                  => array('name', 'status'),
+            'format'                  => '%s <span class="mc_status">%s</span>',
+            'label_callback'          => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'generateLabel'),
         ),
         'global_operations' => array
         (
@@ -80,13 +86,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
                 'href'                => 'act=edit',
                 'icon'                => 'header.svg'
             ),
-            'preview' => array
-            (
-                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['preview'],
-                'href'                => Environment::get('base').'mailchimp/campaign/%s',
-                'icon'                => 'layout.svg',
-                'attributes'          => 'onclick="window.open(\''.Environment::get('base').'mailchimp/campaign/%s\'); return false;"',
-            ),
             'copy' => array
             (
                 'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['copy'],
@@ -105,13 +104,38 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
                 'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['toggle'],
                 'icon'                => 'visible.svg',
                 'attributes'          => 'onclick="Backend.getScrollOffset();return AjaxRequest.toggleVisibility(this,%s)"',
-                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'toggleIcon')
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'toggleIcon'),
             ),
-            'show' => array
+            'preview' => array
             (
-                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['show'],
-                'href'                => 'act=show',
-                'icon'                => 'show.svg'
+                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['preview'],
+                'href'                => Environment::get('base').'mailchimp/campaign/',
+                'icon'                => 'bundles/rhymemailchimp/assets/img/search.svg',
+                'attributes'          => 'onclick="window.open(this.href); return false;" alt="Icon made by Dimitry Miroliubov from www.flaticon.com"',
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'previewIcon'),
+            ),
+            'test' => array
+            (
+                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['test'],
+                'href'                => Environment::get('request').'&key=test&id=',
+                'icon'                => 'bundles/rhymemailchimp/assets/img/flask.svg',
+                'attributes'          => 'alt="Icon made by Freepik from www.flaticon.com"',
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'testIcon'),
+            ),
+            'schedule' => array
+            (
+                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['schedule'],
+                'href'                => Environment::get('request').'&key=schedule&id=',
+                'icon'                => 'assets/datepicker/images/icon.svg',
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'scheduleIcon'),
+            ),
+            'unschedule' => array
+            (
+                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['unschedule'],
+                'href'                => Environment::get('request').'&key=unschedule&id=',
+                'icon'                => 'bundles/rhymemailchimp/assets/img/cancel-calendar.svg',
+                'attributes'          => 'alt="Icon made by Pixel perfect from www.flaticon.com"',
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'unscheduleIcon'),
             ),
         )
     ),
@@ -161,7 +185,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_list'],
             'exclude'                 => true,
-            'filter'                  => true,
             'inputType'               => 'select',
             'options_callback'        => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'getMailchimpLists'),
             'eval'                    => array('tl_class'=>'w50', 'mandatory'=>true, 'includeBlankOption'=>true, 'submitOnChange'=>true, 'chosen'=>true, 'doNotSaveEmpty'=>true),
@@ -240,11 +263,19 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'status' => array
         (
+            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['status'],
             'inputType'               => 'select',
             'default'                 => 'draft',
-            'options'                 => array('draft', 'scheduled', 'paused', 'sent'), // More options?
+            'filter'                  => true,
+            'reference'               => $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses'],
+            'options'                 => array_keys($GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']),
             'eval'                    => array('doNotCopy'=>true),
-            'sql'                     => "varchar(32) NOT NULL default 'draft'"
+            'sql'                     => "varchar(32) NOT NULL default 'new'"
+        ),
+        'send_tstamp' => array
+        (
+            'eval'                    => array('doNotCopy'=>true),
+            'sql'                     => "int(10) unsigned NOT NULL default '0'"
         ),
     )
 );

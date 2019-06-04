@@ -1,0 +1,58 @@
+<div class="mc_white_block">
+
+    <div id="tl_buttons">
+        <a href="contao?do=mailchimp_campaigns" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">Go back</a>
+    </div>
+
+    <h2><?= $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_headline']; ?></h2>
+
+    <div id="mc_messages">
+        <?php if ($this->errors): ?>
+            <p class="tl_error"><?= $this->errors ?></p>
+        <?php endif; ?>
+        <?php if ($this->info): ?>
+            <p class="tl_info"><?= $this->info ?></p>
+        <?php endif; ?>
+        <?php if ($this->confirm): ?>
+            <p class="tl_confirm"><?= $this->confirm ?></p>
+        <?php endif; ?>
+    </div>
+
+    <div id="mc_form">
+
+        <form action="<?= $this->action ?>" class="tl_sent_test_form" method="post">
+            <div class="formbody">
+                <input type="hidden" name="FORM_SUBMIT" value="<?= $this->formId ?>">
+                <input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">
+
+                <div class="tl_box">
+
+                    <?php if ($this->emails): ?>
+                    <div class="widget widget-text w50">
+                        <?= $this->emails ?>
+                        <p class="tl_help tl_tip"><?= $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_recipients'][1]; ?></p>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ($this->types): ?>
+                    <div class="widget widget-select w50">
+                        <?= $this->types ?>
+                        <p class="tl_help tl_tip"><?= $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_type'][1]; ?></p>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="clr"></div>
+
+                </div>
+
+                <?php if ($this->submitLabel): ?>
+                    <div class="submit_container cf">
+                        <button type="submit" name="sendTest" id="sendTest" class="tl_submit"><?= $this->submitLabel ?></button>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </form>
+
+    </div>
+
+</div>
