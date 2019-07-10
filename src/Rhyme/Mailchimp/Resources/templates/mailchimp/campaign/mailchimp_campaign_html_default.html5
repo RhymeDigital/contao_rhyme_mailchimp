@@ -24,7 +24,7 @@
 
                             <td style="width: 100%; max-width: 600px;" valign="top" align="center">
                                 <a href="<?= Environment::get('base') ?>" title="Northampton.Live, Northampton MA Website" style="display: block; padding: 0; margin: 0; line-height: 0;">
-                                    <img src="<?= Environment::get('base') ?>/files/noho/assets/img/email/emailheader.jpg" width="650" alt="" itemprop="image">
+                                    <img src="<?= Environment::get('base') ?>files/noho/assets/img/email/emailheader.jpg" width="650" alt="" itemprop="image">
                                 </a>
                             </td>
 
@@ -71,7 +71,7 @@
                         <tr class="footerTop row">
                             <td align="center" style="width: 100%; max-width: 600px; padding: 10px 0 0;">
                                 <a href="<?= Environment::get('base') ?>" title="Northampton.Live, Northampton MA Website" style="display: block; padding: 0; margin: 0; line-height: 0;">
-                                    <img src="<?= Environment::get('base') ?>/files/noho/assets/img/email/emailfooter.jpg" height="auto" alt="" itemprop="image">
+                                    <img src="<?= Environment::get('base') ?>files/noho/assets/img/email/emailfooter.jpg" height="auto" alt="" itemprop="image">
                                 </a>
                             </td>
                         </tr>

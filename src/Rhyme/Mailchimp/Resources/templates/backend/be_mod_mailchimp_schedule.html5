@@ -20,7 +20,7 @@
 
     <div id="mc_form">
 
-        <form action="<?= $this->action ?>" class="tl_sent_test_form" method="post">
+        <form action="<?= $this->action ?>" class="tl_schedule_email_form" method="post">
             <div class="formbody">
                 <input type="hidden" name="FORM_SUBMIT" value="<?= $this->formId ?>">
                 <input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">

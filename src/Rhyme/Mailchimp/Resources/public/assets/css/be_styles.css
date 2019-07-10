@@ -20,16 +20,29 @@ form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_st
     color: #444;
 }
 form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.new,
-form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.draft {
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.draft,
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.save {
     border: 1px solid #efeeea;
     background-color: #efeeea;
 }
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.schedule,
 form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.scheduled,
 form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.paused {
     border: 1px solid #fbeeca;
     background-color: #fbeeca;
 }
-
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.sending {
+    border: 1px solid #d8eacc;
+    background-color: #c5dbf2;
+}
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.sent {
+    border: 1px solid #d8eacc;
+    background-color: #d8eacc;
+}
+form[action^='contao?do=mailchimp_campaigns'] + #tl_buttons + #tl_listing .mc_status.unknown {
+    border: 1px solid #e9e9e9;
+    background-color: #f3f3f5;
+}
 
 /**
  * Campaigns - Custom mods
