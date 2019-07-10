@@ -50,6 +50,16 @@ class CampaignHandler extends Controller
      */
     public static function createNewMailchimpCampaign(Mailchimp $objMailchimp, MC_CampaignModel $objCampaign)
     {
+        if (!$objCampaign->mc_list ||
+            !$objCampaign->mc_subject ||
+            !$objCampaign->mc_preview_text ||
+            !$objCampaign->name ||
+            !$objCampaign->mc_from_name ||
+            !$objCampaign->mc_replyto_email
+        ) {
+            return;
+        }
+
         if (!\class_exists('\MailchimpAPI\Mailchimp'))
         {
             throw new \Exception('Mailchimp API library not found.');
@@ -108,57 +118,46 @@ class CampaignHandler extends Controller
             }
             else
             {
+                $arrResponseData = json_decode($objResponse->getBody(), true);
+
+                // Save the campaign ID
+                $objCampaign->campaign_id = $arrResponseData['id'];
+                $objCampaign->save();
+
+                // Todo: add options for more than "url" content
+                $arrContentData = array(
+                    'url' => Environment::get('url').'/mailchimp/campaign/'.$objCampaign->campaign_id
+                );
+
+                // !HOOK: Custom actions before creating content
+                if (isset($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent']) && is_array($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent'])) {
+                    foreach ($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent'] as $callback) {
+                        $objCallback = System::importStatic($callback[0]);
+                        $arrContentData = $objCallback->{$callback[1]}($arrContentData, $objMailchimp, $objCampaign, $arrResponseData);
+                    }
+                }
+
+                // Set the content to the local URL - Todo: add other options
+                $objResponse = $objMailchimp
+                    ->campaigns($objCampaign->campaign_id)
+                    ->content()
+                    ->put($arrContentData);
+
+                // !HOOK: Custom actions after creating content
+                if (isset($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent']) && is_array($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent'])) {
+                    foreach ($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent'] as $callback) {
+                        $objCallback = System::importStatic($callback[0]);
+                        $objCallback->{$callback[1]}($objResponse, $objMailchimp, $objCampaign);
+                    }
+                }
+
                 if (!$objResponse->wasSuccess())
                 {
-                    System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                    throw new \Exception('Mailchimp error: ' . $objResponse->getBody());
                 }
                 else
                 {
-                    $arrResponseData = json_decode($objResponse->getBody(), true);
-
-                    // Save the campaign ID
-                    $objCampaign->campaign_id = $arrResponseData['id'];
-                    $objCampaign->save();
-
-                    // Todo: add options for more than "url" content
-                    $arrContentData = array(
-                        'url' => Environment::get('url').'/mailchimp/campaign/'.$objCampaign->campaign_id
-                    );
-
-                    // !HOOK: Custom actions before creating content
-                    if (isset($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent']) && is_array($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent'])) {
-                        foreach ($GLOBALS['TL_HOOKS']['preCreateMailchimpCampaignContent'] as $callback) {
-                            $objCallback = System::importStatic($callback[0]);
-                            $arrContentData = $objCallback->{$callback[1]}($arrContentData, $objMailchimp, $objCampaign, $arrResponseData);
-                        }
-                    }
-
-                    // Set the content to the local URL - Todo: add other options
-                    $objResponse = $objMailchimp
-                        ->campaigns($objCampaign->campaign_id)
-                        ->content()
-                        ->put($arrContentData);
-
-                    // !HOOK: Custom actions after creating content
-                    if (isset($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent']) && is_array($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent'])) {
-                        foreach ($GLOBALS['TL_HOOKS']['postCreateMailchimpCampaignContent'] as $callback) {
-                            $objCallback = System::importStatic($callback[0]);
-                            $objCallback->{$callback[1]}($objResponse, $objMailchimp, $objCampaign);
-                        }
-                    }
-
-                    if (!$objResponse->wasSuccess())
-                    {
-                        throw new \Exception('Mailchimp error: ' . $objResponse->getBody());
-                    }
-                    else
-                    {
-                        // Set the campaign to "draft" status
-                        $objCampaign->status = 'draft';
-                        $objCampaign->save();
-
-                        System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
-                    }
+                    System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
                 }
             }
         }
@@ -250,7 +249,7 @@ class CampaignHandler extends Controller
 
         try
         {
-            // !HOOK: Custom actions before creating campaign
+            // !HOOK: Custom actions before unscheduling the campaign
             if (isset($GLOBALS['TL_HOOKS']['preUnscheduleMailchimpCampaign']) && is_array($GLOBALS['TL_HOOKS']['preUnscheduleMailchimpCampaign'])) {
                 foreach ($GLOBALS['TL_HOOKS']['preUnscheduleMailchimpCampaign'] as $callback) {
                     $objCallback = System::importStatic($callback[0]);

@@ -27,6 +27,7 @@ use MailchimpAPI\MailchimpException;
 use Rhyme\Mailchimp\BackendModule\Campaign as BaseModule;
 use Rhyme\Mailchimp\Model\ApiKey as MC_ApiKeyModel;
 use Rhyme\Mailchimp\Model\Campaign as MC_CampaignModel;
+use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
 
 
 /**
@@ -54,15 +55,13 @@ class ScheduleCampaign extends BaseModule
     {
         parent::compile();
 
-        $strSend = intval($this->objCampaign->send_tstamp) ? Date::parse(Config::get('datimFormat'), intval($this->objCampaign->send_tstamp)) : '';
-
-        if ($this->objCampaign->send_tstamp ||
-            $strSend ||
-            in_array($this->objCampaign->status, array('scheduled', 'sent')))
+        if (!$this->objCampaign->canSchedule())
         {
-            $this->Template->info = sprintf($GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled_for'], $strSend);
+            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'];
             return;
         }
+
+        $strSend = Date::parse(Config::get('datimFormat'), strtotime($this->objCampaign->getSendTime()));
 
         $arrDateData = array(
             'label'                   => &$GLOBALS['TL_LANG']['MSC']['mailchimp_email_date'],
@@ -128,12 +127,8 @@ class ScheduleCampaign extends BaseModule
                     }
                     else
                     {
-                        $this->objCampaign->send_tstamp = strtotime($objDate->value);
-                        $this->objCampaign->status = 'scheduled';
-                        $this->objCampaign->save();
-
                         $this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'];
-                        System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_sent'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                        System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
                     }
                 }
                 catch (\Exception $e)
@@ -144,8 +139,11 @@ class ScheduleCampaign extends BaseModule
             }
         }
 
-        $this->Template->date = $objDate->parse().$wizard;
-        $this->Template->submitLabel = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_schedule_submit'];
-        $this->Template->formId = static::$strFormId;
+        if (!$this->Template->confirm)
+        {
+            $this->Template->date = $objDate->parse().$wizard;
+            $this->Template->submitLabel = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_schedule_submit'];
+            $this->Template->formId = static::$strFormId;
+        }
     }
 }

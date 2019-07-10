@@ -51,6 +51,12 @@ class SendTest extends BaseModule
     {
         parent::compile();
 
+        if (!$this->objCampaign->canSendTest())
+        {
+            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_needs_pause'];
+            return;
+        }
+
         $arrEmailsData = array(
             'label'                   => &$GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_recipients'],
 			'name'                    => 'mailchimp_email_recipients',

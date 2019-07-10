@@ -88,6 +88,12 @@ class Callbacks extends Backend
             return '';
         }
 
+        $objCampaign = MC_CampaignModel::findByPk($row['id']);
+        if (!$objCampaign->canSendTest())
+        {
+            return '';
+        }
+
         $href .= $row['id'];
 
         return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
@@ -113,6 +119,12 @@ class Callbacks extends Backend
             return '';
         }
 
+        $objCampaign = MC_CampaignModel::findByPk($row['id']);
+        if (!$objCampaign->canSchedule())
+        {
+            return '';
+        }
+
         $href .= $row['id'];
 
         return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
@@ -134,6 +146,12 @@ class Callbacks extends Backend
     {
         // Check permissions AFTER checking the cid, so hacking attempts are logged
         if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $objCampaign = MC_CampaignModel::findByPk($row['id']);
+        if (!$objCampaign->canUnschedule())
         {
             return '';
         }
@@ -370,7 +388,10 @@ class Callbacks extends Backend
      */
     public function generateLabel(array $row, $label='', DataContainer $dc=null, $folderAttribute=null, $blnStd=false, $blnProtected=false)
     {
-        return str_replace('<span class="mc_status">', '<span class="mc_status '.StringUtil::standardize($row['status']).'">', $label);
+        $objCampaign = MC_CampaignModel::findByPk($row['id']);
+        $strStatus = $objCampaign->getStatus();
+
+        return $label . ' <span class="mc_status '.StringUtil::standardize($strStatus).'">'.$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses'][$strStatus].'</span>';
     }
 
 

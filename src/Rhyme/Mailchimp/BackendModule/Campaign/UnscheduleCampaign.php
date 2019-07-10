@@ -14,7 +14,7 @@ use Contao\Input;
 use Contao\Image;
 use Contao\Config;
 use Contao\System;
-use Contao\TextField;
+use Contao\CheckBox;
 use Contao\SelectMenu;
 use Contao\Controller;
 use Contao\StringUtil;
@@ -27,6 +27,7 @@ use MailchimpAPI\MailchimpException;
 use Rhyme\Mailchimp\BackendModule\Campaign as BaseModule;
 use Rhyme\Mailchimp\Model\ApiKey as MC_ApiKeyModel;
 use Rhyme\Mailchimp\Model\Campaign as MC_CampaignModel;
+use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
 
 
 /**
@@ -54,65 +55,36 @@ class UnscheduleCampaign extends BaseModule
     {
         parent::compile();
 
-        // Temporary!!
-        $objMailchimp = new Mailchimp($this->objApiKey->api_key);
-        $objResponse = $objMailchimp
-            ->campaigns($this->objCampaign->campaign_id)
-            ->unschedule();
-        return;
-
-        $strSend = $this->objCampaign->send_tstamp ? Date::parse(Config::get('datimFormat'), $this->objCampaign->send_tstamp) : '';
-
-        if ($this->objCampaign->send_tstamp ||
-            $strSend ||
-            in_array($this->objCampaign->status, array('scheduled', 'paused', 'sent')))
+        if (!$this->objCampaign->canUnschedule())
         {
-            $this->Template->info = sprintf($GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled_for'], $strSend);
+            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'];
             return;
         }
 
-        $arrDateData = array(
-            'label'                   => &$GLOBALS['TL_LANG']['MSC']['mailchimp_email_date'],
-            'name'                    => 'mailchimp_schedule',
-            'attributes'              => array(' onkeydown="return false"'),
-            'eval'                    => array('rgxp'=>'datim', 'datepicker'=>true, 'tl_class'=>'w50 wizard', 'onkeydown'=>'return false;', 'onfocus'=>'this.blur(); return false;'),
+        $arrConfirmData = array(
+            'label'                   => &$GLOBALS['TL_LANG']['MSC']['mailchimp_email_confirm_unschedule'],
+            'name'                    => 'mailchimp_unschedule',
+            'options'                 => array('1'=>$GLOBALS['TL_LANG']['MSC']['mailchimp_email_confirm_unschedule'][0]),
+            'eval'                    => array('tl_class'=>'clr m12', 'mandatory'=>true),
         );
-        $objDate = new TextField(TextField::getAttributesFromDca($arrDateData, $arrDateData['name'], $strSend, $arrDateData['name'], '', $this));
+        $objCheckbox = new CheckBox(CheckBox::getAttributesFromDca($arrConfirmData, $arrConfirmData['name'], '', $arrConfirmData['name'], '', $this));
 
 
         // Handle submission
         if (Input::post('FORM_SUBMIT') == static::$strFormId)
         {
-            $objDate->validate();
+            $objCheckbox->validate();
 
-            if (!$objDate->hasErrors())
+            if (!$objCheckbox->hasErrors())
             {
-                // Need to convert to UTC
-                $strUTC = gmdate('c', strtotime($objDate->value));
-
                 try
                 {
                     $objMailchimp = new Mailchimp($this->objApiKey->api_key);
 
-                    $objResponse = $objMailchimp
-                        ->campaigns($this->objCampaign->campaign_id)
-                        ->schedule($strUTC);
+                    CampaignHandler::unscheduleMailchimpCampaign($objMailchimp, $this->objCampaign);
 
-                    if (!$objResponse->wasSuccess())
-                    {
-                        System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
-                        $arrBody = json_decode($objResponse->getBody(), true);
-                        throw new \Exception('Mailchimp error: ' . $arrBody['detail']);
-                    }
-                    else
-                    {
-                        $this->objCampaign->send_tstamp = strtotime($objDate->value);
-                        $this->objCampaign->status = 'scheduled';
-                        $this->objCampaign->save();
-
-                        $this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'];
-                        System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_sent'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
-                    }
+                    $this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'];
+                    System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
                 }
                 catch (\Exception $e)
                 {
@@ -122,8 +94,11 @@ class UnscheduleCampaign extends BaseModule
             }
         }
 
-        $this->Template->date = $objDate->parse().$wizard;
-        $this->Template->submitLabel = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_schedule_submit'];
-        $this->Template->formId = static::$strFormId;
+        if (!$this->Template->confirm)
+        {
+            $this->Template->checkbox = $objCheckbox->parse();
+            $this->Template->submitLabel = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_unschedule_submit'];
+            $this->Template->formId = static::$strFormId;
+        }
     }
 }

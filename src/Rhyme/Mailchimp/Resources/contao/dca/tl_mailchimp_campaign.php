@@ -51,15 +51,16 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
     (
         'sorting' => array
         (
-            'mode'                    => 1,
-            'fields'                  => array('name'),
+            'mode'                    => 2,
+            'disableGrouping'         => true,
+            'fields'                  => array('tstamp DESC', 'id DESC'),
             'headerFields'            => array('name'),
             'panelLayout'             => 'filter;search,limit',
         ),
         'label' => array
         (
-            'fields'                  => array('name', 'status'),
-            'format'                  => '%s <span class="mc_status">%s</span>',
+            'fields'                  => array('name'),
+            'format'                  => '%s',
             'label_callback'          => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'generateLabel'),
         ),
         'global_operations' => array
@@ -161,6 +162,8 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'tstamp' => array
         (
+            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['tstamp'],
+            'flag'                    => 6,
             'sql'                     => "int(10) unsigned NOT NULL default '0'"
         ),
         'name' => array
@@ -179,7 +182,8 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'inputType'               => 'select',
             'foreignKey'              => 'tl_mailchimp_apikeys.name',
             'eval'                    => array('tl_class'=>'w50 clr', 'mandatory'=>true, 'includeBlankOption'=>true, 'submitOnChange'=>true, 'chosen'=>true, 'doNotSaveEmpty'=>true),
-            'sql'                     => "int(10) NOT NULL default '0'"
+            'sql'                     => "int(10) NOT NULL default '0'",
+            'relation'                => array('type'=>'hasOne', 'load'=>'eager'),
         ),
         'mc_list' => array
         (
@@ -260,22 +264,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         (
             'eval'                    => array('doNotCopy'=>true),
             'sql'                     => "varchar(16) NOT NULL default ''"
-        ),
-        'status' => array
-        (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['status'],
-            'inputType'               => 'select',
-            'default'                 => 'draft',
-            'filter'                  => true,
-            'reference'               => $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses'],
-            'options'                 => array_keys($GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses']),
-            'eval'                    => array('doNotCopy'=>true),
-            'sql'                     => "varchar(32) NOT NULL default 'new'"
-        ),
-        'send_tstamp' => array
-        (
-            'eval'                    => array('doNotCopy'=>true),
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
         ),
     )
 );
