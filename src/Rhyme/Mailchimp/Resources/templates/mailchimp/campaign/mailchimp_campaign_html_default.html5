@@ -5,10 +5,12 @@
     use Contao\StringUtil;
     use Contao\Environment;
     ?>
+    <meta name="referrer" content="origin">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta charset="<?php echo $this->charset; ?>">
     <title><?= $this->name ?></title>
     <base href="<?php echo $this->base; ?>">
-    <meta property="og:title" content="<?= $this->name ?>">
+    <meta property="og:title" content="<?= StringUtil::specialchars($this->name) ?>">
     <?= $this->reset_styles ?>
     <?= $this->styles ?>
 </head>
