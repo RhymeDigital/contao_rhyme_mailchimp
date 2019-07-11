@@ -145,7 +145,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
     'palettes' => array
     (
         '__selector__'                => array(),
-        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text;{template_legend},html_tpl,styles_tpl;{publishing_legend},published,start,stop;'
+        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text;{template_legend},html_tpl,reset_styles_tpl,styles_tpl;'
     ),
 
     // Subpalettes
@@ -240,6 +240,18 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'eval'                    => array('tl_class'=>'w50 clr', 'mandatory'=>true, 'chosen'=>true),
             'sql'                     => "varchar(128) NOT NULL default ''"
         ),
+        'reset_styles_tpl' => array
+        (
+            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['reset_styles_tpl'],
+            'default'                 => 'mailchimp_campaign_reset_styles_default',
+            'exclude'                 => true,
+            'inputType'               => 'select',
+            'options_callback'        => function (DataContainer $dc){
+                return Controller::getTemplateGroup('mailchimp_campaign_reset_styles_');
+            },
+            'eval'                    => array('tl_class'=>'w50', 'mandatory'=>true, 'chosen'=>true),
+            'sql'                     => "varchar(128) NOT NULL default ''"
+        ),
         'styles_tpl' => array
         (
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl'],
@@ -257,8 +269,9 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['published'],
             'exclude'                 => true,
             'filter'                  => true,
+            'default'                 => '1',
             'inputType'               => 'checkbox',
-            'sql'                     => "char(1) NOT NULL default ''"
+            'sql'                     => "char(1) NOT NULL default '1'"
         ),
         'campaign_id' => array
         (
