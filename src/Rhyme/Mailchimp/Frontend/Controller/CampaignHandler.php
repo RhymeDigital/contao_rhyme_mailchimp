@@ -312,6 +312,7 @@ class CampaignHandler extends Controller
 
         $arrElements = array();
         $objTemplate = new FrontendTemplate($objCampaign->html_tpl);
+        $objTemplate->setData($objCampaign->row());
 
         // Get elements
         $objElements = ContentModel::findPublishedByPidAndTable($objCampaign->id, MC_CampaignModel::getTable());
@@ -320,17 +321,6 @@ class CampaignHandler extends Controller
             $strBuffer = Controller::getContentElement($objElements->current()->id);
             if (trim($strBuffer))
             {
-                // URL decode image paths (see contao/core#6411)
-                // Make image paths absolute
-                $blnOverrideRoot = false;
-                $strBuffer = preg_replace_callback('@(src=")([^"]+)(")@', function ($args) use (&$blnOverrideRoot) {
-                    if (preg_match('@^(http://|https://)@', $args[2])) {
-                        return $args[1] . $args[2] . $args[3];
-                    }
-                    $blnOverrideRoot = true;
-                    return $args[1] . Environment::get('base') . '/' . rawurldecode($args[2]) . $args[3];
-                }, $strBuffer);
-
                 $arrElements[$objElements->current()->id] = array
                 (
                     'id'            => $objElements->current()->id,
@@ -342,16 +332,34 @@ class CampaignHandler extends Controller
 
         $objTemplate->elements = $arrElements;
 
+        // Get our reset styles
+        $objResetTemplate = new FrontendTemplate($objCampaign->reset_styles_tpl);
+        $objTemplate->reset_styles = $objResetTemplate->parse();
+
         // Get our styles
         $objStyleTemplate = new FrontendTemplate($objCampaign->styles_tpl);
         $objTemplate->styles = $objStyleTemplate->parse();
 
         // Other properties
         $objTemplate->language = $GLOBALS['TL_LANGUAGE'];
+        $objTemplate->language = $GLOBALS['TL_LANGUAGE'];
         $objTemplate->charset = Config::get('characterSet');
         $objTemplate->base = Environment::get('base');
 
-        return new Response($objTemplate->parse());
+        $strBuffer = Controller::replaceInsertTags($objTemplate->parse());
+
+        // URL decode image paths (see contao/core#6411)
+        // Make image paths absolute
+        $blnOverrideRoot = false;
+        $strBuffer = preg_replace_callback('@(src=")([^"]+)(")@', function ($args) use (&$blnOverrideRoot) {
+            if (preg_match('@^(http://|https://)@', $args[2])) {
+                return $args[1] . $args[2] . $args[3];
+            }
+            $blnOverrideRoot = true;
+            return $args[1] . Environment::get('base') . '/' . rawurldecode($args[2]) . $args[3];
+        }, $strBuffer);
+
+        return new Response($strBuffer);
     }
 
     /**

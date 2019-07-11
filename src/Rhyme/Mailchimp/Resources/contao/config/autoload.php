@@ -20,6 +20,7 @@ TemplateLoader::addFiles(array
 
     // Mailchimp
     'mailchimp_campaign_html_default'                           => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',
+    'mailchimp_campaign_reset_styles_default'                   => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',
     'mailchimp_campaign_styles_default'                         => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',
     'mailchimp_campaign_text_default'                           => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',
 ));

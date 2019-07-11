@@ -1,0 +1,101 @@
+<style>
+    /**
+     * Reset styles suggested by Mailchimp
+     */
+    body{
+        margin:0;
+        padding:0;
+    }
+    img{
+        border:0 none;
+        height:auto;
+        line-height:100%;
+        outline:none;
+        text-decoration:none;
+    }
+    a img{
+        border:0 none;
+    }
+    .imageFix{
+        display:block;
+    }
+    table, td{
+        border-collapse:collapse;
+    }
+    #bodyTable{
+        height:100% !important;
+        margin:0;
+        padding:0;
+        width:100% !important;
+    }
+    /**
+     * Outlook/Hotmail class overrides suggested by Mailchimp
+     */
+    .ExternalClass{
+        width:100%;
+    }
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div{
+        line-height: 100%;
+    }
+    /**
+     * It’s possible, in Outlook, to trigger the appearance of a fairly
+     * prominent “View this email in your browser” bar within the application,
+     * allowing you to drive people to view your email in a browser which
+     * will render it in a much better way than Outlook ever can.
+     */
+    #outlook a{
+        padding:0;
+    }
+    /**
+     * Outlook.com / Hotmail sets its own (gross green) color on heading
+     * elements lower in level than an <h1> element. This means you need
+     * to account for headings <h2> through <h6>. Fortunately, it’s as easy
+     * as applying a !important declaration to the heading’s color property
+     */
+    h2,h3,h4,h5,h6{
+        color:#000 !important;
+    }
+    /**
+     * Outlook can sometimes add a bit of spacing on the left and right side
+     * of a <table> element that can cause some layout-related headaches.
+     */
+    table{
+        mso-table-lspace:0pt;
+        mso-table-rspace:0pt;
+    }
+    /**
+     * Using width or height tags to resize images in your markup can
+     * create a problem in Internet Explorer browsers
+     */
+    img{
+        -ms-interpolation-mode:bicubic;
+    }
+    /**
+     * WebKit looks for any text that happens to be sized smaller than
+     * 13px and increases it to that number, which can sometimes cause
+     * design issues in places intended for small text.
+     */
+    body{
+        -webkit-text-size-adjust:100%;
+    }
+    /**
+     * Much like in OSX and iOS, small text is also resized on Windows Mobile
+     */
+    body{
+        -ms-text-size-adjust:100%;
+    }
+    /**
+     * Miscellaneous
+     */
+    figure {
+        margin-block-start: 0;
+        margin-block-end: 0;
+        margin-inline-start: 0;
+        margin-inline-end: 0;
+    }
+</style>

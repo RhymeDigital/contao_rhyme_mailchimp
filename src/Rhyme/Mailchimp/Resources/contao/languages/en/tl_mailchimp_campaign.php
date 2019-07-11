@@ -12,7 +12,7 @@
  * Fields
  */
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['name']					= array('Campaign name', 'Please enter the campaign name.');
-$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['tstamp']					= array('Dte modified', 'This is the last modified date/time.');
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['tstamp']					= array('Date modified', 'This is the last modified date/time.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_api_key']			    = array('API key', 'Please select the API configuration here.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_list']				    = array('Audience', 'Please select the audience/recipient list.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_from_name']			= array('"From" name', 'Please enter the "From" name for the email.');
@@ -21,6 +21,7 @@ $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_subject']			    = array('Subjec
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_preview_text']			= array('Preview text', 'Please enter the preview text for the email.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_title']			    = array('Title', 'Please enter the title for this campaign (how it will be displayed within Mailchimp) .');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['html_tpl']			    = array('HTML template', 'Please select the HTML template for "URL" type emails.');
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['reset_styles_tpl']		= array('"Reset" CSS styles template', 'Please select the reset CSS styles template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl']			    = array('CSS styles template', 'Please select the CSS styles template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['published']			    = array('Published', 'Check this box if the campaign should be published.');
 
