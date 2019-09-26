@@ -18,6 +18,9 @@ TemplateLoader::addFiles(array
     'be_mod_mailchimp_schedule'                                 => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/backend',
     'be_mod_mailchimp_unschedule'                               => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/backend',
 
+    // Content elements
+    'ce_mailchimp_divider'                                      => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/elements',
+
     // Mailchimp
     'mailchimp_campaign_html_default'                           => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',
     'mailchimp_campaign_reset_styles_default'                   => 'vendor/rhymedigital/contao_rhyme_mailchimp/src/Rhyme/Mailchimp/Resources/templates/mailchimp/campaign',

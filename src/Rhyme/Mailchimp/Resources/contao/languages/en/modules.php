@@ -12,6 +12,6 @@
 /**
  * Back end modules
  */
-$GLOBALS['TL_LANG']['MOD']['mailchimp'] 				= array('Mailchimp', 'Manage Mailchimp integration.');
-$GLOBALS['TL_LANG']['MOD']['mailchimp_apikeys'] 		= array('API Keys', 'Manage Mailchimp API keys.');
-$GLOBALS['TL_LANG']['MOD']['mailchimp_campaigns'] 		= array('Campaigns', 'Manage Mailchimp campaigns.');
+$GLOBALS['TL_LANG']['MOD']['rhymemailchimp'] 				    = array('Mailchimp', 'Manage Mailchimp integration.');
+$GLOBALS['TL_LANG']['MOD']['rhymemailchimp_apikeys'] 		    = array('API Keys', 'Manage Mailchimp API keys.');
+$GLOBALS['TL_LANG']['MOD']['rhymemailchimp_campaigns'] 		    = array('Campaigns', 'Manage Mailchimp campaigns.');

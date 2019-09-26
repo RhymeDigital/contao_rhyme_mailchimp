@@ -40,3 +40,10 @@ $GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled']                       
  */
 $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_types']['html']                = 'HTML';
 $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_types']['text']                = 'Text';
+
+
+/**
+ * Content Elements
+ */
+$GLOBALS['TL_LANG']['CTE']['rhymemailchimp']                                    = 'Mailchimp';
+$GLOBALS['TL_LANG']['CTE']['rhymemailchimp_divider']                            = array('Divider', 'Add in an email divider element.');

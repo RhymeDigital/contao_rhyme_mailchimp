@@ -22,21 +22,30 @@ if (TL_MODE === 'BE'){
  * Back end modules
  */
 array_insert($GLOBALS['BE_MOD'], 1, array(
-	'mailchimp' => array
+	'rhymemailchimp' => array
     (
-        'mailchimp_campaigns' => array
+        'rhymemailchimp_campaigns' => array
         (
             'tables'        => array('tl_mailchimp_campaign', 'tl_content'),
             'test'          => array('Rhyme\Mailchimp\BackendModule\Campaign\SendTest', 'generate'),
             'schedule'      => array('Rhyme\Mailchimp\BackendModule\Campaign\ScheduleCampaign', 'generate'),
             'unschedule'    => array('Rhyme\Mailchimp\BackendModule\Campaign\UnscheduleCampaign', 'generate'),
         ),
-        'mailchimp_apikeys' => array
+        'rhymemailchimp_apikeys' => array
         (
             'tables'    => array('tl_mailchimp_apikeys'),
         ),
 	)
 ));
+
+
+/**
+ * Content elements
+ */
+$GLOBALS['TL_CTE']['rhymemailchimp'] = array
+(
+    'rhymemailchimp_divider'					    => 'Rhyme\Mailchimp\ContentElement\Divider',
+);
 
 
 /**
