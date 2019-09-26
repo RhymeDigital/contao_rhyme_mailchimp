@@ -318,6 +318,10 @@ class CampaignHandler extends Controller
         $objElements = ContentModel::findPublishedByPidAndTable($objCampaign->id, MC_CampaignModel::getTable());
         while ($objElements !== null && $objElements->next())
         {
+            // Add campaign data to element
+            $objElements->current()->mc_campaign_data = $objCampaign->row();
+
+            // Parse the element
             $strBuffer = Controller::getContentElement($objElements->current()->id);
             if (trim($strBuffer))
             {
