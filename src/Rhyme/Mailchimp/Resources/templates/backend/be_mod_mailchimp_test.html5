@@ -1,7 +1,7 @@
 <div class="mc_white_block">
 
     <div id="tl_buttons">
-        <a href="contao?do=mailchimp_campaigns" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">Go back</a>
+        <a href="contao?do=rhymemailchimp_campaigns" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">Go back</a>
     </div>
 
     <h2><?= $GLOBALS['TL_LANG']['MSC']['mailchimp_email_test_headline']; ?></h2>
