@@ -51,7 +51,7 @@ class Campaign extends BackendModule
     {
         if (!Input::get('id'))
         {
-            Controller::redirect('contao?do=mailchimp_campaigns');
+            Controller::redirect('contao?do=rhymemailchimp_campaigns');
         }
 
         // Get campaign
