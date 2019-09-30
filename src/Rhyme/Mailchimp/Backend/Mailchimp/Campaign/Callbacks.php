@@ -69,6 +69,31 @@ class Callbacks extends Backend
     }
 
     /**
+     * Return the "archive URL" button
+     *
+     * @param array  $row
+     * @param string $href
+     * @param string $label
+     * @param string $title
+     * @param string $icon
+     * @param string $attributes
+     *
+     * @return string
+     */
+    public function archiveUrlIcon($row, $href, $label, $title, $icon, $attributes)
+    {
+        // Check permissions AFTER checking the cid, so hacking attempts are logged
+        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
+        {
+            return '';
+        }
+
+        $href = $row['mc_long_archive_url'];
+
+        return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
+    }
+
+    /**
      * Return the "test" button
      *
      * @param array  $row

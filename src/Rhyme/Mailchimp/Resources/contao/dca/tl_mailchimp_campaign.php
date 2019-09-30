@@ -115,6 +115,14 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
                 'attributes'          => 'onclick="window.open(this.href); return false;" alt="Icon made by Dimitry Miroliubov from www.flaticon.com"',
                 'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'previewIcon'),
             ),
+            'archive_url' => array
+            (
+                'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['archive_url'],
+                'href'                => Environment::get('base').'mailchimp/campaign/',
+                'icon'                => 'bundles/rhymemailchimp/assets/img/worldwide.svg',
+                'attributes'          => 'onclick="window.open(this.href); return false;" alt="Icon made by turkkub from www.flaticon.com"',
+                'button_callback'     => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'archiveUrlIcon'),
+            ),
             'test' => array
             (
                 'label'               => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['test'],
@@ -227,6 +235,24 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
             'inputType'               => 'text',
             'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'clr long', 'decodeEntities'=>true),
             'sql'                     => "varchar(255) NOT NULL default ''"
+        ),
+        'mc_archive_url' => array
+        (
+            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_archive_url'],
+            'exclude'                 => true,
+            'search'                  => true,
+            'inputType'               => 'text',
+            'eval'                    => array('maxlength'=>255, 'tl_class'=>'clr long'),
+            'sql'                     => "varchar(255) NOT NULL default ''"
+        ),
+        'mc_long_archive_url' => array
+        (
+            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_long_archive_url'],
+            'exclude'                 => true,
+            'search'                  => true,
+            'inputType'               => 'text',
+            'eval'                    => array('maxlength'=>512, 'tl_class'=>'clr long'),
+            'sql'                     => "varchar(512) NOT NULL default ''"
         ),
         'html_tpl' => array
         (

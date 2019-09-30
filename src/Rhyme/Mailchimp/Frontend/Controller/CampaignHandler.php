@@ -120,8 +120,10 @@ class CampaignHandler extends Controller
             {
                 $arrResponseData = json_decode($objResponse->getBody(), true);
 
-                // Save the campaign ID
+                // Save the campaign data
                 $objCampaign->campaign_id = $arrResponseData['id'];
+                $objCampaign->mc_archive_url = $arrResponseData['archive_url'];
+                $objCampaign->mc_long_archive_url = $arrResponseData['long_archive_url'];
                 $objCampaign->save();
 
                 // Todo: add options for more than "url" content
