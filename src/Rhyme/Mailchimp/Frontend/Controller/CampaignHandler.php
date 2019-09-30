@@ -362,7 +362,17 @@ class CampaignHandler extends Controller
                 return $args[1] . $args[2] . $args[3];
             }
             $blnOverrideRoot = true;
-            return $args[1] . Environment::get('base') . '/' . rawurldecode($args[2]) . $args[3];
+            return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
+        }, $strBuffer);
+
+        // Make link paths absolute
+        $blnOverrideRoot = false;
+        $strBuffer = preg_replace_callback('@(href=")([^"]+)(")@', function ($args) use (&$blnOverrideRoot) {
+            if (preg_match('@^(http://|https://)@', $args[2])) {
+                return $args[1] . $args[2] . $args[3];
+            }
+            $blnOverrideRoot = true;
+            return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
         }, $strBuffer);
 
         return new Response($strBuffer);
