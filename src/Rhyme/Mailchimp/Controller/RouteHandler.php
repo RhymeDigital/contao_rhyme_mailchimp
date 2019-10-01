@@ -41,5 +41,22 @@ class RouteHandler extends Controller
         return CampaignHandler::generateHTML($campaign);
     }
 
+    /**
+     * Handles custom script responses
+     *
+     * @param $ceId
+     * @return Response
+     *
+     * @Route("/getCEsrcImgContent/{ceId}", name="contao_rhyme_mailchimp_getcesrcimgcontent")
+     */
+    public function getContentElementSrcImageContent($ceId)
+    {
+        if ($this->container->has('contao.framework')) {
+            $this->container->get('contao.framework')->initialize();
+        }
+
+        return CampaignHandler::getContentElementSrcImageContent($ceId);
+    }
+
 
 }

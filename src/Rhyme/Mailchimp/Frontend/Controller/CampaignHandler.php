@@ -9,6 +9,8 @@
 
 namespace Rhyme\Mailchimp\Frontend\Controller;
 
+use Contao\Date;
+use Contao\File;
 use Contao\Input;
 use Contao\Config;
 use Contao\System;
@@ -352,7 +354,7 @@ class CampaignHandler extends Controller
         $objTemplate->charset = Config::get('characterSet');
         $objTemplate->base = Environment::get('base');
 
-        $strBuffer = Controller::replaceInsertTags($objTemplate->parse());
+        $strBuffer = Controller::replaceInsertTags($objTemplate->minifyHtml($objTemplate->parse()));
 
         // URL decode image paths (see contao/core#6411)
         // Make image paths absolute
@@ -377,6 +379,93 @@ class CampaignHandler extends Controller
 
         return new Response($strBuffer);
     }
+
+
+    /**
+     * Get content element image "src" so we don't use cached assets
+     * @param $ceId
+     * @return Response
+     */
+    public static function getContentElementSrcImageContent($ceId)
+    {
+        $strBuffer = Controller::getContentElement($ceId);
+        if ($strBuffer)
+        {
+            $strBuffer = static::getSectionOfString($strBuffer, '<img ', '>');
+            if ($strBuffer)
+            {
+                // Allow bypassing of src
+                $srcAttribute = 'src';
+                if (stripos($strBuffer, 'data-src="') !== false)
+                {
+                    $srcAttribute = 'data-src';
+                    $strBuffer = static::getSectionOfString($strBuffer, 'data-src="', '"');
+                }
+                else
+                {
+                    $strBuffer = static::getSectionOfString($strBuffer, 'src="', '"');
+                }
+
+                if ($strBuffer)
+                {
+                    $strSrc = str_ireplace(array($srcAttribute.'="', '"'), '', $strBuffer);
+                    if (file_exists(TL_ROOT.'/'.$strSrc))
+                    {
+                        try
+                        {
+                            $objFile = new File($strSrc);
+
+                            // Send the right headers
+                            header("Content-Type: image/".$objFile->extension);
+                            header("Content-Length: " . $objFile->size);
+
+                            // Dump the picture and stop the script
+                            fpassthru($objFile->handle);
+                            exit;
+                        }
+                        catch (\Exception $e) {
+                            return new Response('');
+                        }
+                    }
+                }
+            }
+        }
+
+        return new Response('');
+    }
+
+
+    /**
+     * Return a section of a string using a start and end (use "<input" and ">" to get any input elements)
+     * @param string
+     * @param string
+     * @param string
+     * @param boolean
+     * @param integer
+     * @return string
+     */
+    public static function getSectionOfString($strSubject, $strStart, $strEnd, $blnCaseSensitive=true, $intSearchStart=0)
+    {
+        // First index of start string
+        $varStart = $blnCaseSensitive ? strpos($strSubject, $strStart, $intSearchStart) : stripos($strSubject, $strStart, $intSearchStart);
+
+        if ($varStart === false)
+        {
+            return false;
+        }
+
+        // First index of end string
+        $varEnd = $blnCaseSensitive ? strpos($strSubject, $strEnd, ($varStart + strlen($strStart))) : stripos($strSubject, $strEnd, ($varStart + strlen($strStart)));
+
+        if ($varEnd === false)
+        {
+            return false;
+        }
+
+        // Return the string including the start string, end string, and everything in between
+        return substr($strSubject, $varStart, ($varEnd + strlen($strEnd) - $varStart));
+    }
+
 
     /**
      * Use output buffer to var dump to a string
