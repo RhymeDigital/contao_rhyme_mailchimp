@@ -43,6 +43,11 @@ form[action^='contao?do=rhymemailchimp_campaigns'] + #tl_buttons + * .mc_status.
     border: 1px solid #e9e9e9;
     background-color: #f3f3f5;
 }
+form[action^='contao?do=rhymemailchimp_campaigns'] + #tl_buttons + * .mc_send_time {
+    color: #898989;
+    font-size: 12px;
+}
+
 
 /**
  * Campaigns - Custom mods

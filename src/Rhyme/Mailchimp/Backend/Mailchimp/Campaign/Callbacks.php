@@ -9,6 +9,8 @@
 
 namespace Rhyme\Mailchimp\Backend\Mailchimp\Campaign;
 
+use Contao\Date;
+use Contao\Config;
 use Contao\Input;
 use Contao\Image;
 use Contao\System;
@@ -414,9 +416,19 @@ class Callbacks extends Backend
     public function generateLabel(array $row, $label='', DataContainer $dc=null, $folderAttribute=null, $blnStd=false, $blnProtected=false)
     {
         $objCampaign = MC_CampaignModel::findByPk($row['id']);
-        $strStatus = $objCampaign->getStatus();
+        if ($objCampaign === null)
+        {
+            return $label;
+        }
 
-        return $label . ' <span class="mc_status '.StringUtil::standardize($strStatus).'">'.$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses'][$strStatus].'</span>';
+        $strStatus = $objCampaign->getStatus();
+        $strSendTime = $objCampaign->getSendTime();
+        $strSendTime = $strSendTime ? strtotime($strSendTime) : '';
+
+        return $label . ' <span class="mc_status '.StringUtil::standardize($strStatus).'">'.
+            $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['statuses'][$strStatus].'</span>'.
+            ($strSendTime ? ' <span class="mc_send_time">[Send time: '.Date::parse(Date::getNumericDatimFormat(), $strSendTime).']</span>' : '')
+            ;
     }
 
 
