@@ -83,7 +83,7 @@ class SendDataToMailchimp extends Frontend
                             foreach ($GLOBALS['TL_HOOKS']['mailchimp_fields'] as $callback)
                             {
                                 $this->import($callback[0]);
-                                list($list, $strEmail, $merge_vars) = $this->{$callback[0]}->{$callback[1]}($list, $strEmail, $merge_vars, $arrFormData, $arrFormInfo, $arrFiles, $arrLabels, $email_type);
+                                list($list, $strEmail, $merge_vars) = $this->{$callback[0]}->{$callback[1]}($list, $strEmail, $arrMergeVars, $arrFormData, $arrFormInfo, $arrFiles, $arrLabels, $email_type);
                             }
                         }
 
