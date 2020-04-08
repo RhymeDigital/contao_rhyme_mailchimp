@@ -360,7 +360,7 @@ class CampaignHandler extends Controller
         // Make image paths absolute
         $blnOverrideRoot = false;
         $strBuffer = preg_replace_callback('@(src=")([^"]+)(")@', function ($args) use (&$blnOverrideRoot) {
-            if (preg_match('@^(http://|https://)@', $args[2]) || stripos($args[2], 'data:image') !== false) {
+            if (preg_match('@^(http://|https://|mailto:)@', $args[2]) || stripos($args[2], 'data:image') !== false) {
                 return $args[1] . $args[2] . $args[3];
             }
             $blnOverrideRoot = true;
@@ -370,7 +370,7 @@ class CampaignHandler extends Controller
         // Make link paths absolute
         $blnOverrideRoot = false;
         $strBuffer = preg_replace_callback('@(href=")([^"]+)(")@', function ($args) use (&$blnOverrideRoot) {
-            if (preg_match('@^(http://|https://)@', $args[2])) {
+            if (preg_match('@^(http://|https://|mailto:)@', $args[2])) {
                 return $args[1] . $args[2] . $args[3];
             }
             $blnOverrideRoot = true;
