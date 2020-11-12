@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Response;
+use Contao\Controller as ContaoController;
 use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
 
 /**
@@ -37,6 +38,24 @@ class RouteHandler extends Controller
         if ($this->container->has('contao.framework')) {
             $this->container->get('contao.framework')->initialize();
         }
+
+        return CampaignHandler::generateHTML($campaign);
+    }
+
+    /**
+     * Handles custom script responses
+     *
+     * @return Response
+     *
+     * @Route("/campaign", name="contao_rhyme_mailchimp_campaign_empty")
+     */
+    public function emptyFix()
+    {
+        if ($this->container->has('contao.framework')) {
+            $this->container->get('contao.framework')->initialize();
+        }
+
+        ContaoController::redirect('');
 
         return CampaignHandler::generateHTML($campaign);
     }
