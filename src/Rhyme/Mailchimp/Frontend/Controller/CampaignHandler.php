@@ -377,6 +377,9 @@ class CampaignHandler extends Controller
             return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
         }, $strBuffer);
 
+        // Replace any empty hrefs
+        $strBuffer = str_ireplace('href=""', 'href="'.Environment::get('base').'"', $strBuffer);
+
         return new Response($strBuffer);
     }
 
