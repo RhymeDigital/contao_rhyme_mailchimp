@@ -10,7 +10,7 @@
 namespace Rhyme\Mailchimp\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +22,7 @@ use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
  * *
  * @Route("/mailchimp", defaults={"_scope" = "frontend"})
  */
-class RouteHandler extends Controller
+class RouteHandler extends AbstractController
 {
 
     /**
