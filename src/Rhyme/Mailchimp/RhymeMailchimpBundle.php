@@ -10,7 +10,7 @@
 namespace Rhyme\Mailchimp;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle as SymfonyBundle;
-use Rhyme\Mailchimp\DependencyInjection\Extension as RhymeMailchimpExtension;
+use Rhyme\Mailchimp\DependencyInjection\RhymeMailchimpExtension as RhymeMailchimpExtension;
 
 /**
  * Class RhymeMailchimpBundle
@@ -18,5 +18,12 @@ use Rhyme\Mailchimp\DependencyInjection\Extension as RhymeMailchimpExtension;
  */
 class RhymeMailchimpBundle extends SymfonyBundle
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getContainerExtension()
+    {
+        return new RhymeMailchimpExtension();
+    }
 
 }

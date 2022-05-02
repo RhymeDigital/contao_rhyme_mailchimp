@@ -1,0 +1,18 @@
+##
+# Listener priorities
+#
+#
+# The priorities of the following listeners must be lower than the one of the
+# Symfony route listener (defaults to 32).
+#
+# - 16: BootContaoFrameworkListener
+#
+# Do not change the priorities unless you know what you are doing!
+##
+services:
+    rhyme_mailchimp.listener.bootcontaoframework:
+        class: Rhyme\Mailchimp\EventListener\BootContaoFrameworkListener
+        arguments:
+            - "@contao.framework"
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 16 }
