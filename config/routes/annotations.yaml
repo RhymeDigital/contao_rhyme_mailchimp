@@ -1,0 +1,3 @@
+controllers:
+    resource: ../../src/Rhyme/Mailchimp/Controller/
+    type: annotation

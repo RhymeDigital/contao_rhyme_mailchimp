@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autoconfigure: true
+
+    _instanceof:
+        Contao\CoreBundle\Framework\FrameworkAwareInterface:
+            calls:
+                - ["setFramework", ["@contao.framework"]]
+
+    Rhyme\Mailchimp\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
