@@ -10,19 +10,21 @@
 namespace Rhyme\Mailchimp\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Contao\CoreBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Response;
 use Contao\Controller as ContaoController;
 use Rhyme\Mailchimp\Frontend\Controller\CampaignHandler;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Handles custom scripts
  * *
  * @Route("/mailchimp", defaults={"_scope" = "frontend"})
  */
-class RouteHandler extends AbstractController
+class RouteHandler extends AbstractController implements ServiceSubscriberInterface
 {
 
     /**
@@ -35,9 +37,7 @@ class RouteHandler extends AbstractController
      */
     public function generateContent($campaign)
     {
-        if ($this->container->has('contao.framework')) {
-            $this->container->get('contao.framework')->initialize();
-        }
+        $this->initializeContaoFramework();
 
         return CampaignHandler::generateHTML($campaign);
     }
@@ -51,9 +51,7 @@ class RouteHandler extends AbstractController
      */
     public function emptyFix()
     {
-        if ($this->container->has('contao.framework')) {
-            $this->container->get('contao.framework')->initialize();
-        }
+        $this->initializeContaoFramework();
 
         ContaoController::redirect('');
 
@@ -70,11 +68,19 @@ class RouteHandler extends AbstractController
      */
     public function getContentElementSrcImageContent($ceId)
     {
-        if ($this->container->has('contao.framework')) {
-            $this->container->get('contao.framework')->initialize();
-        }
+        $this->initializeContaoFramework();
 
         return CampaignHandler::getContentElementSrcImageContent($ceId);
+    }
+
+    /**
+     * @required
+     */
+    public function setContainer(ContainerInterface $container): ?ContainerInterface
+    {
+        $previous = parent::setContainer($container);
+
+        return $previous ?? $container;
     }
 
 
