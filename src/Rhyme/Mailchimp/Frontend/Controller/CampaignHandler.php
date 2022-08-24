@@ -373,6 +373,9 @@ class CampaignHandler extends Controller
             if (preg_match('@^(http://|https://|mailto:)@', $args[2])) {
                 return $args[1] . $args[2] . $args[3];
             }
+            if (preg_match('@^(\*\||\|\*)@', $args[2])) {
+                return $args[1] . $args[2] . $args[3];
+            }
             $blnOverrideRoot = true;
             return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
         }, $strBuffer);
