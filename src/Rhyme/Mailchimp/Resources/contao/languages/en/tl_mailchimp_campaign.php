@@ -24,6 +24,7 @@ $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['html_tpl']			    = array('HTML tem
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['reset_styles_tpl']		= array('"Reset" CSS styles template', 'Please select the reset CSS styles template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl']			    = array('CSS styles template', 'Please select the CSS styles template for "URL" type emails.');
 $GLOBALS['TL_LANG']['tl_mailchimp_campaign']['published']			    = array('Published', 'Check this box if the campaign should be published.');
+$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['archived']			    = array('Archived', 'Check this box if the campaign should be archived.');
 
 
 /**
