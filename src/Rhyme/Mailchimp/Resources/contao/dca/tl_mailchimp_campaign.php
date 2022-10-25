@@ -153,7 +153,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
     'palettes' => array
     (
         '__selector__'                => array(),
-        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text;{template_legend},html_tpl,reset_styles_tpl,styles_tpl;'
+        'default'                     => '{general_legend},name;{mailchimp_legend},mc_api_key,mc_list,mc_from_name,mc_replyto_email,mc_subject,mc_preview_text;{template_legend},html_tpl,reset_styles_tpl,styles_tpl;{publishing_legend},published,archived'
     ),
 
     // Subpalettes
@@ -170,13 +170,11 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'tstamp' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['tstamp'],
             'flag'                    => 6,
             'sql'                     => "int(10) unsigned NOT NULL default '0'"
         ),
         'name' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['name'],
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
@@ -185,7 +183,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_api_key' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_api_key'],
             'exclude'                 => true,
             'inputType'               => 'select',
             'foreignKey'              => 'tl_mailchimp_apikeys.name',
@@ -195,7 +192,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_list' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_list'],
             'exclude'                 => true,
             'inputType'               => 'select',
             'options_callback'        => array('Rhyme\Mailchimp\Backend\Mailchimp\Campaign\Callbacks', 'getMailchimpLists'),
@@ -204,7 +200,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_from_name' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_from_name'],
             'exclude'                 => true,
             'inputType'               => 'text',
             'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50 clr', 'decodeEntities'=>true),
@@ -212,7 +207,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_replyto_email' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_replyto_email'],
             'exclude'                 => true,
             'inputType'               => 'text',
             'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50', 'rgxp'=>'email', 'decodeEntities'=>true),
@@ -220,7 +214,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_subject' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_subject'],
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
@@ -229,7 +222,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_preview_text' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_preview_text'],
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
@@ -238,7 +230,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_archive_url' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_archive_url'],
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
@@ -247,7 +238,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'mc_long_archive_url' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['mc_long_archive_url'],
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
@@ -256,7 +246,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'html_tpl' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['html_tpl'],
             'default'                 => 'mailchimp_campaign_html_default',
             'exclude'                 => true,
             'inputType'               => 'select',
@@ -268,7 +257,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'reset_styles_tpl' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['reset_styles_tpl'],
             'default'                 => 'mailchimp_campaign_reset_styles_default',
             'exclude'                 => true,
             'inputType'               => 'select',
@@ -280,7 +268,6 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'styles_tpl' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['styles_tpl'],
             'default'                 => 'mailchimp_campaign_styles_default',
             'exclude'                 => true,
             'inputType'               => 'select',
@@ -292,12 +279,19 @@ $GLOBALS['TL_DCA']['tl_mailchimp_campaign'] = array
         ),
         'published' => array
         (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_mailchimp_campaign']['published'],
             'exclude'                 => true,
             'filter'                  => true,
             'default'                 => '1',
             'inputType'               => 'checkbox',
             'sql'                     => "char(1) NOT NULL default '1'"
+        ),
+        'archived' => array
+        (
+            'exclude'                 => true,
+            'filter'                  => true,
+            'default'                 => '',
+            'inputType'               => 'checkbox',
+            'sql'                     => "char(1) NOT NULL default ''"
         ),
         'campaign_id' => array
         (
