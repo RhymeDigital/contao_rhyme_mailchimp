@@ -91,7 +91,7 @@ class SendDataToMailchimp extends Frontend
                         (
                             'email_address'         => $strEmail,
                             'email_type'            => $email_type,
-                            'status'                => 'subscribed',
+                            'status'                => 'pending',
                         );
 
                         if (!empty($arrMergeVars))
