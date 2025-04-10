@@ -7,55 +7,64 @@
  * @license		http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
 
-/**
- * Backend scripts
- */
-if (TL_MODE === 'BE'){
+namespace {
 
-    $GLOBALS['TL_CSS'] = is_array($GLOBALS['TL_CSS']) ? $GLOBALS['TL_CSS'] : array();
-    array_insert($GLOBALS['TL_CSS'], 9999, array(
-        'bundles/rhymemailchimp/assets/css/be_styles.css',
+    use Contao\ArrayUtil;
+    use Contao\System;
+    use Symfony\Component\HttpFoundation\Request;
+
+    /**
+     * Backend scripts
+     */
+    if (System::getContainer()->get('contao.routing.scope_matcher')
+        ->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))) {
+
+        $GLOBALS['TL_CSS'] = is_array($GLOBALS['TL_CSS']) ? $GLOBALS['TL_CSS'] : array();
+        ArrayUtil::arrayInsert($GLOBALS['TL_CSS'], 9999, array(
+            'bundles/rhymemailchimp/assets/css/be_styles.css',
+        ));
+    }
+
+    /**
+     * Back end modules
+     */
+    ArrayUtil::arrayInsert($GLOBALS['BE_MOD'], 1, array(
+        'rhymemailchimp' => array
+        (
+            'rhymemailchimp_campaigns' => array
+            (
+                'tables' => array('tl_mailchimp_campaign', 'tl_content'),
+                'test' => array('Rhyme\Mailchimp\BackendModule\Campaign\SendTest', 'generate'),
+                'schedule' => array('Rhyme\Mailchimp\BackendModule\Campaign\ScheduleCampaign', 'generate'),
+                'unschedule' => array('Rhyme\Mailchimp\BackendModule\Campaign\UnscheduleCampaign', 'generate'),
+            ),
+            'rhymemailchimp_apikeys' => array
+            (
+                'tables' => array('tl_mailchimp_apikeys'),
+            ),
+        )
     ));
-}
 
-/**
- * Back end modules
- */
-array_insert($GLOBALS['BE_MOD'], 1, array(
-	'rhymemailchimp' => array
+
+    /**
+     * Content elements
+     */
+    $GLOBALS['TL_CTE']['rhymemailchimp'] = array
     (
-        'rhymemailchimp_campaigns' => array
-        (
-            'tables'        => array('tl_mailchimp_campaign', 'tl_content'),
-            'test'          => array('Rhyme\Mailchimp\BackendModule\Campaign\SendTest', 'generate'),
-            'schedule'      => array('Rhyme\Mailchimp\BackendModule\Campaign\ScheduleCampaign', 'generate'),
-            'unschedule'    => array('Rhyme\Mailchimp\BackendModule\Campaign\UnscheduleCampaign', 'generate'),
-        ),
-        'rhymemailchimp_apikeys' => array
-        (
-            'tables'    => array('tl_mailchimp_apikeys'),
-        ),
-	)
-));
+        'rhymemailchimp_divider' => 'Rhyme\Mailchimp\ContentElement\Divider',
+    );
 
 
-/**
- * Content elements
- */
-$GLOBALS['TL_CTE']['rhymemailchimp'] = array
-(
-    'rhymemailchimp_divider'					    => 'Rhyme\Mailchimp\ContentElement\Divider',
-);
+    /**
+     * Hooks
+     */
+    $GLOBALS['TL_HOOKS']['processFormData'][] = array('Rhyme\Mailchimp\Hooks\ProcessFormData\SendDataToMailchimp', 'run');
 
 
-/**
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['processFormData'][]				= array('Rhyme\Mailchimp\Hooks\ProcessFormData\SendDataToMailchimp', 'run');
+    /**
+     * Models
+     */
+    $GLOBALS['TL_MODELS']['tl_mailchimp_apikeys'] = 'Rhyme\Mailchimp\Model\ApiKey';
+    $GLOBALS['TL_MODELS']['tl_mailchimp_campaign'] = 'Rhyme\Mailchimp\Model\Campaign';
 
-
-/**
- * Models
- */
-$GLOBALS['TL_MODELS']['tl_mailchimp_apikeys']           = 'Rhyme\Mailchimp\Model\ApiKey';
-$GLOBALS['TL_MODELS']['tl_mailchimp_campaign']			= 'Rhyme\Mailchimp\Model\Campaign';
+}

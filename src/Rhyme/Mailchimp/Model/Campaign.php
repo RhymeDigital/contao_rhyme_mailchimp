@@ -114,7 +114,8 @@ class Campaign extends Model
         }
         catch (\Exception $e)
         {
-            System::log('Error while attempting to get campaign data from API: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';', __METHOD__, TL_ERROR);
+            $logger = System::getContainer()->get('monolog.logger.contao.error');
+            $logger->error('Error while attempting to get campaign data from API: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';');
         }
 
         return $arrData;
@@ -137,7 +138,8 @@ class Campaign extends Model
         }
         catch (\Exception $e)
         {
-            System::log('Error while attempting to get campaign status: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';', __METHOD__, TL_ERROR);
+            $logger = System::getContainer()->get('monolog.logger.contao.error');
+            $logger->error('Error while attempting to get campaign status: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';');
         }
 
         return $strStatus;
@@ -160,7 +162,8 @@ class Campaign extends Model
         }
         catch (\Exception $e)
         {
-            System::log('Error while attempting to get campaign send_time: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';', __METHOD__, TL_ERROR);
+            $logger = System::getContainer()->get('monolog.logger.contao.error');
+            $logger->error('Error while attempting to get campaign send_time: Contao ID = ' . $this->id . '; Mailchimp ID = ' . $this->campaign_id . '; Message = ' . $e->getMessage() . ';');
         }
 
         return $strSendTime;

@@ -50,13 +50,16 @@ class SendDataToMailchimp extends Frontend
             {
                 $objMailchimp = new Mailchimp($objResult->api_key);
 
+                $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+                $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
+
                 if (\class_exists('\Contao\StringUtil'))
                 {
                     $arrLists = StringUtil::deserialize($arrFormInfo['mailChimpLists'], true);
                 }
                 else
                 {
-                    $arrLists = \deserialize($arrFormInfo['mailChimpLists'], true);
+                    $arrLists = StringUtil::deserialize($arrFormInfo['mailChimpLists'], true);
                 }
 
                 if (count($arrLists))
@@ -82,8 +85,7 @@ class SendDataToMailchimp extends Frontend
                         {
                             foreach ($GLOBALS['TL_HOOKS']['mailchimp_fields'] as $callback)
                             {
-                                $this->import($callback[0]);
-                                list($list, $strEmail, $merge_vars) = $this->{$callback[0]}->{$callback[1]}($list, $strEmail, $arrMergeVars, $arrFormData, $arrFormInfo, $arrFiles, $arrLabels, $email_type);
+                                list($list, $strEmail, $merge_vars) = System::importStatic($callback[0])->{$callback[1]}($list, $strEmail, $arrMergeVars, $arrFormData, $arrFormInfo, $arrFiles, $arrLabels, $email_type);
                             }
                         }
 
@@ -103,18 +105,18 @@ class SendDataToMailchimp extends Frontend
 
                         if (!$objResponse->wasSuccess())
                         {
-                            System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                            $loggerErr->error('MailChimp error: ' . $objResponse->getBody());
                         }
                         else
                         {
-                            System::log("Subscribed - look for the confirmation email!", __METHOD__, TL_GENERAL);
+                            $loggerGen->info("Subscribed - look for the confirmation email!");
                         }
                     }
                 }
             }
             catch (\Exception $e)
             {
-                System::log('MailChimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+                $loggerErr->error('MailChimp error: ' . $e->getMessage());
             }
         }
     }

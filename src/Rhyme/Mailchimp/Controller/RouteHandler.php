@@ -55,7 +55,7 @@ class RouteHandler extends AbstractController implements ServiceSubscriberInterf
 
         ContaoController::redirect('');
 
-        return CampaignHandler::generateHTML($campaign);
+        return new Response('');
     }
 
     /**
