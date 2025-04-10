@@ -99,6 +99,9 @@ class ScheduleCampaign extends BaseModule
             // Fix for dumb js values
             Input::setPost('mailchimp_schedule', str_replace('  ', ' ', Input::post('mailchimp_schedule')));
 
+            $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+            $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
+
             $objDate->validate();
 
             if (strtotime($objDate->value) <= time() + 60)
@@ -121,19 +124,20 @@ class ScheduleCampaign extends BaseModule
 
                     if (!$objResponse->wasSuccess())
                     {
-                        System::log('Mailchimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                        $loggerErr->error('Mailchimp error: ' . $objResponse->getBody());
                         $arrBody = json_decode($objResponse->getBody(), true);
                         throw new \Exception('Mailchimp error: ' . $arrBody['detail']);
                     }
                     else
                     {
                         $this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'];
-                        System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                        $loggerGen->info($GLOBALS['TL_LANG']['MSC']['mailchimp_email_scheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';');
+
                     }
                 }
                 catch (\Exception $e)
                 {
-                    System::log($e->getMessage(), __METHOD__, TL_ERROR);
+                    $loggerErr->error('Mailchimp error: ' . $e->getMessage());
                     $this->Template->errors = $e->getMessage();
                 }
             }

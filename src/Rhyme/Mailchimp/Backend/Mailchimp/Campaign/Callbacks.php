@@ -42,7 +42,6 @@ class Callbacks extends Backend
     public function __construct()
     {
         parent::__construct();
-        $this->import('BackendUser', 'User');
     }
 
     /**
@@ -59,12 +58,6 @@ class Callbacks extends Backend
      */
     public function previewIcon($row, $href, $label, $title, $icon, $attributes)
     {
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
-        }
-
         $href .= $row['campaign_id'];
 
         return '<a href="'.$href.'" title="'.StringUtil::specialchars($title).'"'.$attributes.'><img src="'.$icon.'" height="16" width="16" alt="'.StringUtil::specialchars($label).'"></a> ';
@@ -84,11 +77,6 @@ class Callbacks extends Backend
      */
     public function archiveUrlIcon($row, $href, $label, $title, $icon, $attributes)
     {
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
-        }
 
         $href = $row['mc_long_archive_url'];
 
@@ -109,12 +97,6 @@ class Callbacks extends Backend
      */
     public function testIcon($row, $href, $label, $title, $icon, $attributes)
     {
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
-        }
-
         $objCampaign = MC_CampaignModel::findByPk($row['id']);
         if (!$objCampaign->canSendTest())
         {
@@ -140,11 +122,6 @@ class Callbacks extends Backend
      */
     public function scheduleIcon($row, $href, $label, $title, $icon, $attributes)
     {
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
-        }
 
         $objCampaign = MC_CampaignModel::findByPk($row['id']);
         if (!$objCampaign->canSchedule())
@@ -171,12 +148,6 @@ class Callbacks extends Backend
      */
     public function unscheduleIcon($row, $href, $label, $title, $icon, $attributes)
     {
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
-        }
-
         $objCampaign = MC_CampaignModel::findByPk($row['id']);
         if (!$objCampaign->canUnschedule())
         {
@@ -206,12 +177,6 @@ class Callbacks extends Backend
         {
             $this->toggleVisibility(Input::get('cid'), (Input::get('state') == 1), (@func_get_arg(12) ?: null));
             $this->redirect($this->getReferer());
-        }
-
-        // Check permissions AFTER checking the cid, so hacking attempts are logged
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            return '';
         }
 
         $href .= '&amp;id='.Input::get('id').'&amp;cid='.$row['id'].'&amp;state='.$row['published'];
@@ -251,20 +216,13 @@ class Callbacks extends Backend
             {
                 if (\is_array($callback))
                 {
-                    $this->import($callback[0]);
-                    $this->{$callback[0]}->{$callback[1]}($dc);
+                    System::importStatic($callback[0])->{$callback[1]}($dc);
                 }
                 elseif (\is_callable($callback))
                 {
                     $callback($dc);
                 }
             }
-        }
-
-        // Check the field access
-        if (!$this->User->hasAccess('tl_mailchimp_campaign::published', 'alexf'))
-        {
-            throw new Contao\CoreBundle\Exception\AccessDeniedException('Not enough permissions to show/hide Mailchimp campaign ID ' . $intId . '.');
         }
 
         // Set the current record
@@ -290,8 +248,7 @@ class Callbacks extends Backend
             {
                 if (\is_array($callback))
                 {
-                    $this->import($callback[0]);
-                    $blnVisible = $this->{$callback[0]}->{$callback[1]}($blnVisible, $dc);
+                    $blnVisible = System::importStatic($callback[0])->{$callback[1]}($blnVisible, $dc);
                 }
                 elseif (\is_callable($callback))
                 {
@@ -319,8 +276,7 @@ class Callbacks extends Backend
             {
                 if (\is_array($callback))
                 {
-                    $this->import($callback[0]);
-                    $this->{$callback[0]}->{$callback[1]}($dc);
+                    System::importStatic($callback[0])->{$callback[1]}($dc);
                 }
                 elseif (\is_callable($callback))
                 {
@@ -362,7 +318,8 @@ class Callbacks extends Backend
 
                 if (!$objResponse->wasSuccess())
                 {
-                    System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                    $logger = System::getContainer()->get('monolog.logger.contao.error');
+                    $logger->error('Mailchimp error: ' . $objResponse->getBody());
                 }
                 else
                 {
@@ -376,7 +333,8 @@ class Callbacks extends Backend
             }
             catch (MailchimpException $e)
             {
-                System::log('MailChimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+                $logger = System::getContainer()->get('monolog.logger.contao.error');
+                $logger->error('Mailchimp error: ' . $e->getMessage());
             }
         }
 
@@ -447,11 +405,14 @@ class Callbacks extends Backend
             return;
         }
 
+        $logger = System::getContainer()->get('monolog.logger.contao.error');
+
         // Get the current campaign model
         $objCampaign = MC_CampaignModel::findByPk($dc->activeRecord->id);
         if ($objCampaign === null)
         {
-            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
+
+            $logger->error('Could not load the Mailchimp campaign model.');
             return;
         }
 
@@ -459,7 +420,7 @@ class Callbacks extends Backend
         $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
         if ($objApiKey === null)
         {
-            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
+            $logger->error('Missing Mailchimp API key configuration.');
             return;
         }
 
@@ -504,11 +465,13 @@ class Callbacks extends Backend
             return;
         }
 
+        $logger = System::getContainer()->get('monolog.logger.contao.error');
+
         // Get the current campaign model
         $objCampaign = MC_CampaignModel::findByPk($dc->activeRecord->id);
         if ($objCampaign === null)
         {
-            System::log('Could not load the Mailchimp campaign model.', __METHOD__, TL_ERROR);
+            $logger->error('Could not load the Mailchimp campaign model.');
             return;
         }
 
@@ -516,7 +479,7 @@ class Callbacks extends Backend
         $objApiKey = MC_ApiKeyModel::findByPk($objCampaign->mc_api_key);
         if ($objApiKey === null)
         {
-            System::log('Missing Mailchimp API key configuration.', __METHOD__, TL_ERROR);
+            $logger->error('Missing Mailchimp API key configuration.');
             return;
         }
 

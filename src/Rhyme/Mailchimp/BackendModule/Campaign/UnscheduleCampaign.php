@@ -73,6 +73,9 @@ class UnscheduleCampaign extends BaseModule
         // Handle submission
         if (Input::post('FORM_SUBMIT') == static::$strFormId)
         {
+            $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+            $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
+
             $objCheckbox->validate();
 
             if (!$objCheckbox->hasErrors())
@@ -84,11 +87,12 @@ class UnscheduleCampaign extends BaseModule
                     CampaignHandler::unscheduleMailchimpCampaign($objMailchimp, $this->objCampaign);
 
                     $this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'];
-                    System::log($GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                    $loggerGen->info($GLOBALS['TL_LANG']['MSC']['mailchimp_email_unscheduled'].': Contao ID = ' . $this->objCampaign->id . '; Mailchimp ID = ' . $this->objCampaign->campaign_id . ';');
+
                 }
                 catch (\Exception $e)
                 {
-                    System::log($e->getMessage(), __METHOD__, TL_ERROR);
+                    $loggerErr->error($e->getMessage());
                     $this->Template->errors = $e->getMessage();
                 }
             }

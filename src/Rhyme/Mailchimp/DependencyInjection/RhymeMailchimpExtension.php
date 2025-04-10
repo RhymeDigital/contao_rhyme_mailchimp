@@ -12,12 +12,12 @@ namespace Rhyme\Mailchimp\DependencyInjection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 
 /**
  * Adds the bundle services to the container.
  */
-class RhymeMailchimpExtension extends ConfigurableExtension
+class RhymeMailchimpExtension extends Extension
 {
     /**
      * @var array
@@ -30,7 +30,7 @@ class RhymeMailchimpExtension extends ConfigurableExtension
     /**
      * {@inheritdoc}
      */
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'rhyme_mailchimp';
     }
@@ -38,7 +38,7 @@ class RhymeMailchimpExtension extends ConfigurableExtension
     /**
      * {@inheritdoc}
      */
-    protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    public function load(array $mergedConfig, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $processedConfig = $this->processConfiguration($configuration, $mergedConfig);

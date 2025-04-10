@@ -55,7 +55,8 @@ class Callbacks extends Backend
 
                 if (!$objResponse->wasSuccess())
                 {
-                    System::log('MailChimp error: ' . $objResponse->getBody(), __METHOD__, TL_ERROR);
+                    $logger = System::getContainer()->get('monolog.logger.contao.error');
+                    $logger->error('MailChimp error: ' . $objResponse->getBody());
                 }
                 else
                 {
@@ -69,7 +70,8 @@ class Callbacks extends Backend
             }
             catch (MailchimpException $e)
             {
-                System::log('MailChimp error: ' . $e->getMessage(), __METHOD__, TL_ERROR);
+                $logger = System::getContainer()->get('monolog.logger.contao.error');
+                $logger->error('MailChimp error: ' . $e->getMessage());
             }
         }
 

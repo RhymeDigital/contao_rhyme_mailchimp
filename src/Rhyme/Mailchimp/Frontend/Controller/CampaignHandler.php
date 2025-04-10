@@ -67,6 +67,9 @@ class CampaignHandler extends Controller
             throw new \Exception('Mailchimp API library not found.');
         }
 
+        $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+        $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
+
         try
         {
             $arrCampaignData = array(
@@ -161,13 +164,13 @@ class CampaignHandler extends Controller
                 }
                 else
                 {
-                    System::log('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                    $loggerGen->info('Mailchimp campaign created successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';');
                 }
             }
         }
         catch (\Exception $e)
         {
-            System::log($e->getMessage(), __METHOD__, TL_ERROR);
+            $loggerErr->error('Mailchimp error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         }
     }
@@ -185,6 +188,9 @@ class CampaignHandler extends Controller
         {
             throw new \Exception('Mailchimp API library not found.');
         }
+
+        $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+        $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
 
         try
         {
@@ -227,12 +233,12 @@ class CampaignHandler extends Controller
             }
             else
             {
-                System::log('Mailchimp campaign updated successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                $loggerGen->info('Mailchimp campaign updated successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';');
             }
         }
         catch (\Exception $e)
         {
-            System::log($e->getMessage(), __METHOD__, TL_ERROR);
+            $loggerErr->error('Mailchimp error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         }
     }
@@ -250,6 +256,9 @@ class CampaignHandler extends Controller
         {
             throw new \Exception('Mailchimp API library not found.');
         }
+
+        $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+        $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
 
         try
         {
@@ -280,12 +289,12 @@ class CampaignHandler extends Controller
             }
             else
             {
-                System::log('Mailchimp campaign unscheduled successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';', __METHOD__, TL_GENERAL);
+                $loggerGen->info('Mailchimp campaign unscheduled successfully: Contao ID = ' . $objCampaign->id . '; Mailchimp ID = ' . $objCampaign->campaign_id . ';');
             }
         }
         catch (\Exception $e)
         {
-            System::log($e->getMessage(), __METHOD__, TL_ERROR);
+            $loggerErr->error('Mailchimp error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         }
     }
@@ -354,7 +363,7 @@ class CampaignHandler extends Controller
         $objTemplate->charset = Config::get('characterSet');
         $objTemplate->base = Environment::get('base');
 
-        $strBuffer = Controller::replaceInsertTags($objTemplate->minifyHtml($objTemplate->parse()));
+        $strBuffer = System::getContainer()->get('contao.insert_tag.parser')->replace($objTemplate->minifyHtml($objTemplate->parse()));
 
         // URL decode image paths (see contao/core#6411)
         // Make image paths absolute
