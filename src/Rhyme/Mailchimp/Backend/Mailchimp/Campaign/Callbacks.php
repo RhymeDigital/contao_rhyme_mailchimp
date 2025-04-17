@@ -429,7 +429,7 @@ class Callbacks extends Backend
             $objMailchimp = new Mailchimp($objApiKey->api_key);
 
             // Pass the submitted data via the campaign model
-            $arrRow = $dc->activeRecord->row();
+            $arrRow = $dc->getCurrentRecord();
             foreach ($arrRow as $field=>$data)
             {
                 $objCampaign->{$field} = $data;

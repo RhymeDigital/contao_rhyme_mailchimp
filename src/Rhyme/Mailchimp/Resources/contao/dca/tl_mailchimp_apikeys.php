@@ -7,6 +7,7 @@
  * @license		http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
 
+use Contao\DC_Table;
 use Contao\Controller;
 
 /**
@@ -23,7 +24,7 @@ $GLOBALS['TL_DCA']['tl_mailchimp_apikeys'] = array
 	// ConfigÅ
 	'config' => array
 	(
-		'dataContainer'               => 'Table',
+		'dataContainer'               => DC_Table::class,
 		'enableVersioning'            => true,
 		'sql' => array
 		(
