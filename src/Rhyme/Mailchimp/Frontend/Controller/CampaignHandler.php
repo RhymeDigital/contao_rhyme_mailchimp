@@ -307,11 +307,15 @@ class CampaignHandler extends Controller
      */
     public static function generateHTML($campaignId)
     {
+
+        $loggerErr = System::getContainer()->get('monolog.logger.contao.error');
+        $loggerGen = System::getContainer()->get('monolog.logger.contao.general');
+
         // Make sure we have an ID
         $strCampaign = trim($campaignId);
         if (!$strCampaign)
         {
-            System::log('No campaign selected.', __METHOD__, TL_ERROR);
+            $loggerErr->error('No campaign selected.');
             return new Response('No campaign selected.');
         }
 
@@ -319,7 +323,7 @@ class CampaignHandler extends Controller
         $objCampaign = MC_CampaignModel::findPublishedByCampaignId($strCampaign);
         if ($objCampaign === null)
         {
-            System::log('Invalid campaign selected.', __METHOD__, TL_ERROR);
+            $loggerErr->error('Invalid campaign selected.');
             return new Response('Invalid campaign selected.');
         }
 
@@ -373,7 +377,7 @@ class CampaignHandler extends Controller
                 return $args[1] . $args[2] . $args[3];
             }
             $blnOverrideRoot = true;
-            return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
+            return $args[1] . Environment::get('url') . '' . rawurldecode($args[2]) . $args[3];
         }, $strBuffer);
 
         // Make link paths absolute
@@ -386,11 +390,11 @@ class CampaignHandler extends Controller
                 return $args[1] . $args[2] . $args[3];
             }
             $blnOverrideRoot = true;
-            return $args[1] . Environment::get('base') . '' . rawurldecode($args[2]) . $args[3];
+            return $args[1] . Environment::get('url') . '' . rawurldecode($args[2]) . $args[3];
         }, $strBuffer);
 
         // Replace any empty hrefs
-        $strBuffer = str_ireplace('href=""', 'href="'.Environment::get('base').'"', $strBuffer);
+        $strBuffer = str_ireplace('href=""', 'href="'.Environment::get('url').'"', $strBuffer);
 
         return new Response($strBuffer);
     }
@@ -423,8 +427,9 @@ class CampaignHandler extends Controller
 
                 if ($strBuffer)
                 {
+                    $rootDir = System::getContainer()->getParameter('kernel.project_dir');
                     $strSrc = str_ireplace(array($srcAttribute.'="', '"'), '', $strBuffer);
-                    if (file_exists(TL_ROOT.'/'.$strSrc))
+                    if (file_exists($rootDir.'/'.$strSrc))
                     {
                         try
                         {
